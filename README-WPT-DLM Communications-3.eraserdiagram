@@ -1,0 +1,51 @@
+cloud-architecture-diagram
+
+// Wireless Power Transfer - Dynamic Load Management
+title WPT-DLM Communications
+
+DLM Hub [icon: battery-charging, color: green] {
+  Charging Nodes [icon: zap, color: yellow] {
+    Node 1 [icon: circle-ci]
+    Node 2 [icon: circle-ci]
+  }
+  // Charging Station Management System
+  CSMS [icon: mainframe, color: blue] {
+    MC [icon: chip]
+    Generator [icon: battery-charging]
+  }
+  
+}
+
+Central Cloud [icon: cloud, color: blue] {
+  Data Archive [icon: server]
+  Digital Twins [icon: cloud-cog]
+  Operational Dashboard [icon: bar-chart-2]
+  Machine Learning & Analytics [icon: brain, color: purple] {
+    Predictive ML Module [icon: trending-up, label: "Prediction"]
+    Recommendations Engine [icon: map-pin, label: "Recommendations"]
+  }
+}
+
+Mobile App [icon: smartphone, color: orange] {
+  Interactive Map [icon: map]
+  Suggestions Hub [icon: thumbs-up]
+}
+
+Electric vehicle [icon: car, color: red] {
+  Position [icon: map-pin]
+  Battery [icon: battery]
+  CarPlay [icon: airplay]
+}
+
+CSMS > Central Cloud: MQTT [color: orange]
+
+Electric vehicle > Central Cloud: MQTT [color: orange]
+
+CSMS <> Charging Nodes: SERIAL [color: purple]
+
+Central Cloud > Mobile App: WebSocket [color: green]
+
+Mobile App <> Central Cloud: HTTPS [color: red]
+
+
+

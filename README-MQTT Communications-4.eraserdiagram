@@ -1,0 +1,37 @@
+cloud-architecture-diagram
+
+title MQTT Communications
+
+// Level 1: Edge
+DLM Hub [icon: battery-charging, color: green] {
+    // Charging Station Management System
+  CSMS [icon: mainframe, color: blue] {
+    Raspberry pi [icon: raspberry-pi] {
+      Twins [icon: gear]
+      Bridge [icon: cpu]
+    }
+  }
+  
+}
+ 
+Electric vehicle [icon: car, color: red] {
+  Position [icon: map-pin]
+  Battery [icon: battery]
+}
+
+Central Cloud [label: Central Cloud, color: blue, icon: cloud] {
+  MQTT Broker [icon: mqtt, label: MQTT Broker]
+  Telegraf [icon: open-telemetry, label: Telegraf]
+  Brain [icon: fastapi, color: red] {
+    Digital Twins [icon: cloud-cog]
+  }
+
+}
+
+Electric vehicle > MQTT Broker: publisher [color: orange]
+
+Raspberry pi > MQTT Broker: publisher[color: orange]
+
+Telegraf > MQTT Broker: subscriber [color: purple]
+
+Brain > MQTT Broker: subscriber [color: purple]    

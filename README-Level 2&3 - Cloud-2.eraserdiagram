@@ -1,0 +1,34 @@
+cloud-architecture-diagram
+
+title Level 2&3 - Cloud
+
+Central Cloud [color: blue, icon: cloud] {
+  Machine Learning [color: purple, icon: fastapi] {
+    Predictive ML Module [label: Prediction, icon: trending-up]
+    Recommendations Engine [label: Recommendations, icon: map-pin]
+  }
+
+  PostgresSQL [icon: postgres, color: green]
+  API [icon: fastapi, color: red] {
+    Digital Twins [icon: cloud-cog]
+  }
+  MQTT Broker [icon: mqtt, color: yellow]
+  InfluxDB [icon: influxdb, color: green]
+  Grafana [icon: grafana, color: orange]
+  Telegraf [icon: open-telemetry, colorMode: pastel]
+}
+
+Machine Learning < InfluxDB:  get traning data
+Grafana < InfluxDB
+Telegraf > InfluxDB
+
+MQTT Broker > Telegraf
+
+API < MQTT Broker: get twin info
+
+Machine Learning > API
+
+PostgresSQL > Grafana
+
+API > PostgresSQL
+PostgresSQL > Machine Learning: get traning data
