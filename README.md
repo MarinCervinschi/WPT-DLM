@@ -3,7 +3,9 @@
 # WPT-DLM
 This project implements a smart energy orchestration system for wireless charging hubs. It utilizes IoT telemetry to monitor State of Charge (SoC) and a Dynamic Load Management logic to shift grid capacity to critical users, maximizing throughput and efficiency.
 
- 
+  
+
+
 
 
 <!-- eraser-additional-content -->
@@ -13,6 +15,7 @@ This project implements a smart energy orchestration system for wireless chargin
 <a href="/README-Level 2&3 - Cloud-2.eraserdiagram" data-element-id="z1fLtN1Pi2Ed9TSYLy_mm"><img src="/.eraser/ckMgfMWXETpfMUeeZgOh___4SCKNyJL8SMwR7QrXqo5OfS44bQ2___---diagram----b2014d803362ff6bace94805e844e310-Level-2-3---Cloud.png" alt="" data-element-id="z1fLtN1Pi2Ed9TSYLy_mm" /></a>
 <a href="/README-WPT-DLM Communications-3.eraserdiagram" data-element-id="SzsOyQy3vm1-rzsHEhoXi"><img src="/.eraser/ckMgfMWXETpfMUeeZgOh___4SCKNyJL8SMwR7QrXqo5OfS44bQ2___---diagram----7002d23aa0eecb839eda355536428af4-WPT-DLM-Communications.png" alt="" data-element-id="SzsOyQy3vm1-rzsHEhoXi" /></a>
 <a href="/README-MQTT Communications-4.eraserdiagram" data-element-id="RoUn7RU6jCmdFCRULfX-a"><img src="/.eraser/ckMgfMWXETpfMUeeZgOh___4SCKNyJL8SMwR7QrXqo5OfS44bQ2___---diagram----1b73e8a12e0807934d8eecc60f00d283-MQTT-Communications.png" alt="" data-element-id="RoUn7RU6jCmdFCRULfX-a" /></a>
+<a href="/README-PostgresSQL database-5.eraserdiagram" data-element-id="YiIdFMM5JvimPrVneXaL0"><img src="/.eraser/ckMgfMWXETpfMUeeZgOh___4SCKNyJL8SMwR7QrXqo5OfS44bQ2___---diagram----fd05d4d02b11bc23c9970eae5da98ee8-PostgresSQL-database.png" alt="" data-element-id="YiIdFMM5JvimPrVneXaL0" /></a>
 <!-- end-eraser-additional-files -->
 <!-- end-eraser-additional-content -->
 <!--- Eraser file: https://app.eraser.io/workspace/ckMgfMWXETpfMUeeZgOh --->

@@ -1,0 +1,68 @@
+entity-relationship-diagram
+
+title PostgresSQL database
+notation chen
+
+geo_location [icon: map-pin, color: blue] {
+  lat float 
+  long float
+  alt float
+}
+ 
+hubs [icon: battery-charging, color: green] {
+  hub_id string pk
+  pos geo_location
+  max_grid_capacity_kw float
+  is_active boolean
+  last_seen DateTime
+  nodes string
+  dlm_events string
+}
+
+nodes [icon: circle-ci, color: yellow] {
+  node_id string pk
+  name string
+  max_power_kw float
+  is_maintenance boolean
+  charging_sessions string
+  dlm_events string
+}
+
+vehicles [icon: car, color: red] {
+  vehicle_id string pk
+  model string
+  manufacturer string
+  registered_at DateTime
+  driver_id string
+  charging_sessions string
+}
+
+charging_sessions [icon: battery, color: purple] {
+  charging_session_id string pk
+  start_time DateTime
+  end_time DateTime
+  total_energy_kwh float
+  avg_power_kw float 
+}
+
+dlm_events [icon: ai, color: purple] {
+  dlm_event_id string pk
+  timestamp DateTime
+  trigger_reason string
+  total_grid_load_kw float
+  available_capacity_at_trigger float
+  original_limit_kw float
+  new_limit_kw float 
+}
+
+hubs.nodes < nodes.node_id
+nodes.charging_sessions < charging_sessions.charging_session_id
+nodes.dlm_events < dlm_events. dlm_event_id
+
+hubs.dlm_events < dlm_events.dlm_event_id
+  
+vehicles.charging_sessions < charging_sessions.charging_session_id
+  
+hubs.pos - geo_location
+
+
