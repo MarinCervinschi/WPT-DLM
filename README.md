@@ -3,7 +3,11 @@
 # WPT-DLM
 This project implements a smart energy orchestration system for wireless charging hubs. It utilizes IoT telemetry to monitor State of Charge (SoC) and a Dynamic Load Management logic to shift grid capacity to critical users, maximizing throughput and efficiency.
 
-[﻿WPT-DLM Architecture](https://app.eraser.io/workspace/ckMgfMWXETpfMUeeZgOh?elements=MBSM1O4MrMJs4i_HZRn9Rw) 
+
+
+![IoT: Level 2&3 - Cloud](undefined "IoT: Level 2&3 - Cloud")
+
+
 
 
 <!-- eraser-additional-content -->
