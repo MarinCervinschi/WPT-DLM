@@ -3,7 +3,37 @@
 # WPT-DLM
 This project implements a smart energy orchestration system for wireless charging hubs. It utilizes IoT telemetry to monitor State of Charge (SoC) and a Dynamic Load Management logic to shift grid capacity to critical users, maximizing throughput and efficiency.
 
-  
+## MQTT Topics
+### Publishers
+1. INFO
+    - [ ] `iot/hubs/<hub_id>/info` - `retain=True` 
+    - [ ] `iot/vehicles/<vehicle_id>/info` - `retain=True` 
+    - [ ] `iot/hubs/<hub_id>/nodes/<node_id>/info` - `retain=True` 
+
+2. STATUS
+    - [ ] `iot/hubs/<hub_id>/status` 
+    - [ ] `iot/hubs/<hub_id>/nodes/<node_id>/status` 
+
+3. TELEMETRY
+    - [ ] `iot/vehicles/<vehicle_id>/telemetry` 
+    - [ ] `iot/hubs/<hub_id>/nodes/<node_id>/telemetry` 
+
+4. DLM
+    - [ ] `iot/hubs/<hub_id>/dlm/events` 
+
+### Subscribers (Cloud)
+1. API (brain)
+    - [ ] `iot/hubs/+/info` 
+    - [ ] `iot/vehicles/+/info` 
+    - [ ] `iot/hubs/+/nodes/+/info` 
+    - [ ] `iot/hubs/<hub_id>/dlm/events` 
+    - [ ] `iot/vehicles/<vehicle_id>/telemetry` 
+    - [ ] `iot/hubs/<hub_id>/nodes/<node_id>/status` 
+
+2. Telegraf
+    - [ ] `iot/hubs/+/status` 
+    - [ ] `iot/hubs/+/nodes/+/status` 
+    - [ ] `iot/hubs/+/nodes/+/telemetry` 
 
 
 
