@@ -16,6 +16,7 @@ This project implements a smart energy orchestration system for wireless chargin
 <a href="/README-WPT-DLM Communications-3.eraserdiagram" data-element-id="SzsOyQy3vm1-rzsHEhoXi"><img src="/.eraser/ckMgfMWXETpfMUeeZgOh___4SCKNyJL8SMwR7QrXqo5OfS44bQ2___---diagram----7002d23aa0eecb839eda355536428af4-WPT-DLM-Communications.png" alt="" data-element-id="SzsOyQy3vm1-rzsHEhoXi" /></a>
 <a href="/README-MQTT Communications-4.eraserdiagram" data-element-id="RoUn7RU6jCmdFCRULfX-a"><img src="/.eraser/ckMgfMWXETpfMUeeZgOh___4SCKNyJL8SMwR7QrXqo5OfS44bQ2___---diagram----1b73e8a12e0807934d8eecc60f00d283-MQTT-Communications.png" alt="" data-element-id="RoUn7RU6jCmdFCRULfX-a" /></a>
 <a href="/README-PostgresSQL database-5.eraserdiagram" data-element-id="YiIdFMM5JvimPrVneXaL0"><img src="/.eraser/ckMgfMWXETpfMUeeZgOh___4SCKNyJL8SMwR7QrXqo5OfS44bQ2___---diagram----fd05d4d02b11bc23c9970eae5da98ee8-PostgresSQL-database.png" alt="" data-element-id="YiIdFMM5JvimPrVneXaL0" /></a>
+<a href="/README-Sequence Diagram of /recommendations-6.eraserdiagram" data-element-id="yBDGnZ1tXTITsJNfmO0_R"><img src="/.eraser/ckMgfMWXETpfMUeeZgOh___4SCKNyJL8SMwR7QrXqo5OfS44bQ2___---diagram----8082d232b4a8361cf473e5e948681704-Sequence-Diagram-of--recommendations.png" alt="" data-element-id="yBDGnZ1tXTITsJNfmO0_R" /></a>
 <!-- end-eraser-additional-files -->
 <!-- end-eraser-additional-content -->
 <!--- Eraser file: https://app.eraser.io/workspace/ckMgfMWXETpfMUeeZgOh --->

@@ -1,0 +1,34 @@
+sequence-diagram
+
+title Sequence Diagram of /recommendations
+Client [icon: mobile, color: orange]
+API [icon: fastapi, color: green]
+PostgresSQL [icon: postgres, color: blue]
+InludxDB [icon: influxdb, color: yellow]
+ML service [icon: machine-learning, color: purple]
+
+Client > API: POST /recommendations 
+
+activate API
+API -> PostgresSQL: get hubs
+
+PostgresSQL --> API: returns
+
+API -> API: calc energy to reach
+
+API > InludxDB: get current status
+
+InludxDB --> API: returns
+
+API > ML service: predict
+activate ML service
+
+ML service > ML service: work
+
+ML service --> API: returns
+deactivate ML service
+
+API > API: calc score
+
+API --> Client: returns
+deactivate API
