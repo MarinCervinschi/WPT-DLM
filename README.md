@@ -26,9 +26,9 @@ This project implements a smart energy orchestration system for wireless chargin
     - [ ] `iot/hubs/+/info` 
     - [ ] `iot/vehicles/+/info` 
     - [ ] `iot/hubs/+/nodes/+/info` 
-    - [ ] `iot/hubs/<hub_id>/dlm/events` 
-    - [ ] `iot/vehicles/<vehicle_id>/telemetry` 
-    - [ ] `iot/hubs/<hub_id>/nodes/<node_id>/status` 
+    - [ ] `iot/hubs/+/dlm/events` 
+    - [ ] `iot/vehicles/+/telemetry` 
+    - [ ] `iot/hubs/+/nodes/+/status` 
 
 2. Telegraf
     - [ ] `iot/hubs/+/status` 
