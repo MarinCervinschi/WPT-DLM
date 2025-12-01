@@ -104,6 +104,9 @@ docker compose up -d postgres
 
 # Run the API
 uv run run_api.py
+
+# Seed some data in the database
+uv run scripts/db/seed_db.py --reset
 ```
 
 ### API Documentation
