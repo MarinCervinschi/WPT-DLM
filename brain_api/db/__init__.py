@@ -1,10 +1,10 @@
+from .base import Base, drop_db, init_db, seed_db
 from .session import (
-    engine,
     SessionLocal,
-    get_db,
     check_db_health,
+    engine,
+    get_db,
 )
-from .base import Base, init_db, drop_db
 
 __all__ = [
     # Session management
@@ -15,5 +15,6 @@ __all__ = [
     # Base and initialization
     "Base",
     "init_db",
+    "seed_db",
     "drop_db",
 ]
