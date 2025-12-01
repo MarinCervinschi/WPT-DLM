@@ -89,6 +89,31 @@ config/
 └── grafana/provisioning/      # Auto-configured datasources
 ```
 
+## Brain API
+
+FastAPI service for managing hubs, nodes, vehicles, and DLM events.
+
+### Setup
+
+```bash
+# Install dependencies
+uv sync
+
+# Start PostgreSQL
+docker compose up -d postgres
+
+# Run the API
+uv run run_api.py
+```
+
+### API Documentation
+
+| URL | Description |
+|-----|-------------|
+| http://localhost:8000/docs | Swagger UI |
+| http://localhost:8000/redoc | ReDoc UI |
+| http://localhost:8000/openapi.json | OpenAPI schema |
+
 <!-- eraser-additional-content -->
 ## Diagrams
 <!-- eraser-additional-files -->
