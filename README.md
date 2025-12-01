@@ -35,8 +35,59 @@ This project implements a smart energy orchestration system for wireless chargin
     - [ ] `iot/hubs/+/nodes/+/status` 
     - [ ] `iot/hubs/+/nodes/+/telemetry` 
 
+## Docker Compose
 
+### Services
 
+| Service | Port | Description |
+|---------|------|-------------|
+| **mqtt-broker** | 1883 | Eclipse Mosquitto - MQTT message broker |
+| **influxdb** | 8086 | Time-series database for telemetry |
+| **telegraf** | - | Collects MQTT data → writes to InfluxDB |
+| **grafana** | 3000 | Visualization dashboards |
+| **postgres** | 5432 | Relational database for entities |
+
+### Quick Start
+
+```bash
+# 1. Copy environment file and configure
+cp .env.example .env
+
+# 2. Start all services
+docker compose up -d
+
+# 3. Check status
+docker compose ps
+```
+
+### Access
+
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| Grafana | http://localhost:3000 | `.env` → `GRAFANA_ADMIN_USER/PASSWORD` |
+| InfluxDB | http://localhost:8086 | `.env` → `INFLUXDB_ADMIN_USER/PASSWORD` |
+
+### Commands
+
+```bash
+# View logs
+docker compose logs -f [service_name]
+
+# Stop all
+docker compose down
+
+# Reset (removes volumes)
+docker compose down -v
+```
+
+### Configuration Files
+
+```
+config/
+├── mosquitto/mosquitto.conf   # MQTT broker settings
+├── telegraf/telegraf.conf     # MQTT → InfluxDB pipeline
+└── grafana/provisioning/      # Auto-configured datasources
+```
 
 <!-- eraser-additional-content -->
 ## Diagrams
