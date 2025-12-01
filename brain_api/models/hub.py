@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, Float, String
+from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, Float, String, func
 from sqlalchemy.orm import relationship
 
 from ..db import Base
@@ -32,10 +32,11 @@ class Hub(Base):
         Float, nullable=False, default=100.0, comment="Maximum grid capacity in kW"
     )
 
-    is_active = Column(Boolean, nullable=False, default=True)
+    is_active = Column(Boolean, nullable=False, default=True, server_default="true")
     last_seen = Column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
         onupdate=lambda: datetime.now(timezone.utc),
     )
 

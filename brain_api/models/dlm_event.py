@@ -8,6 +8,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    func,
 )
 from sqlalchemy.orm import relationship
 
@@ -37,6 +38,7 @@ class DLMEvent(Base):
         DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
         index=True,
     )
 
@@ -64,7 +66,7 @@ class DLMEvent(Base):
     available_capacity_at_trigger = Column(
         Float, nullable=True, comment="Hub.max_grid_capacity_kw - total_grid_load_kw"
     )
-    
+
     original_limit_kw = Column(
         Float, nullable=False, comment="Power limit before adjustment"
     )

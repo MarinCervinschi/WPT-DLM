@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, String
+from sqlalchemy import Column, DateTime, String, func
 from sqlalchemy.orm import relationship
 
 from ..db import Base
@@ -26,6 +26,7 @@ class Vehicle(Base):
         DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
     )
 
     sessions = relationship("ChargingSession", back_populates="vehicle")
