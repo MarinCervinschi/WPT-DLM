@@ -4,6 +4,7 @@ datasources:
   # InfluxDB Data Source
   - name: InfluxDB
     type: influxdb
+    uid: influxdb
     access: proxy
     url: http://influxdb:8086
     jsonData:
@@ -19,6 +20,7 @@ datasources:
   # PostgreSQL Data Source
   - name: PostgreSQL
     type: postgres
+    uid: postgresql
     url: postgres:5432
     database: ${POSTGRES_DB}
     user: ${POSTGRES_USER}
