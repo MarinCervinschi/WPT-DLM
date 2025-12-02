@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from ..repositories.base import NotFoundError
-from ..schemas import VehicleCreate, VehicleUpdate, VehicleResponse, VehicleListResponse
+from ..schemas import VehicleCreate, VehicleListResponse, VehicleResponse, VehicleUpdate
 from .dependencies import VehicleServiceDep
 
 router = APIRouter(prefix="/vehicles", tags=["Vehicles"])

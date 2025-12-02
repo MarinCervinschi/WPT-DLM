@@ -1,6 +1,6 @@
 from ..models import Hub
 from ..repositories import HubRepository
-from ..schemas import HubCreate, HubUpdate, HubResponse, HubListResponse
+from ..schemas import HubCreate, HubListResponse, HubResponse, HubUpdate
 from .base import BaseService
 
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from ..repositories.base import NotFoundError
-from ..schemas import HubCreate, HubUpdate, HubResponse, HubListResponse
+from ..schemas import HubCreate, HubListResponse, HubResponse, HubUpdate
 from .dependencies import HubServiceDep
 
 router = APIRouter(prefix="/hubs", tags=["Hubs"])

@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 engine = create_engine(
     settings.database_url,
     pool_pre_ping=True,
-    pool_size=settings.DB_POOL_SIZE, 
+    pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_MAX_OVERFLOW,
-    echo=settings.DB_ECHO, # (debug logging)
+    echo=settings.DB_ECHO,  # (debug logging)
 )
 
 SessionLocal = sessionmaker(
@@ -24,16 +24,17 @@ SessionLocal = sessionmaker(
     bind=engine,
 )
 
+
 def get_db() -> Generator[Session, None, None]:
     """
     FastAPI dependency that provides a database session.
-    
+
     Creates a new session for each request and ensures proper cleanup.
-    
+
     Usage:
         from fastapi import Depends
         from brain_api.db import get_db
-        
+
         @router.get("/hubs")
         def list_hubs(db: Session = Depends(get_db)):
             return db.query(Hub).all()
@@ -44,10 +45,11 @@ def get_db() -> Generator[Session, None, None]:
     finally:
         db.close()
 
+
 def check_db_health() -> dict:
     """
     Check database connectivity.
-    
+
     Returns:
         dict: {"status": "healthy"} or {"status": "unhealthy", "error": "..."}
     """

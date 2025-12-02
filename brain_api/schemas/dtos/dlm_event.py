@@ -7,7 +7,6 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # ==================== Base Schema ====================
 
 
@@ -23,7 +22,9 @@ class DLMEventBase(BaseModel):
         description="Trigger reason (e.g., GRID_OVERLOAD)",
     )
     total_grid_load_kw: float = Field(..., ge=0, description="Total grid load in kW")
-    original_limit_kw: float = Field(..., ge=0, description="Original power limit in kW")
+    original_limit_kw: float = Field(
+        ..., ge=0, description="Original power limit in kW"
+    )
     new_limit_kw: float = Field(..., ge=0, description="New power limit in kW")
 
 

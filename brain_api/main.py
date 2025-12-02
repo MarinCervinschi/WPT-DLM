@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .api import health, hubs, nodes, vehicles, sessions, dlm
+from .api import dlm, health, hubs, nodes, sessions, vehicles
 from .core.config import settings
 from .core.logging import setup_logging
 from .db import init_db

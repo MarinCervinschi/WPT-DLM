@@ -5,8 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from ..models import Vehicle
-from .base import BaseRepository
 from ..schemas import VehicleCreate, VehicleUpdate
+from .base import BaseRepository
 
 
 class VehicleRepository(BaseRepository[Vehicle, VehicleCreate, VehicleUpdate]):

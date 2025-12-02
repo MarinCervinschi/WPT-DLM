@@ -4,8 +4,8 @@ from typing import Sequence
 from sqlalchemy import and_, func, select
 
 from ..models import ChargingSession
-from .base import BaseRepository
 from ..schemas import ChargingSessionCreate, ChargingSessionUpdate
+from .base import BaseRepository
 
 
 class ChargingSessionRepository(

@@ -18,7 +18,7 @@ class Node(Base):
         ),
     )
 
-    node_id = Column(String(50), primary_key=True, index=True) 
+    node_id = Column(String(50), primary_key=True, index=True)
     hub_id = Column(
         String(50),
         ForeignKey("hubs.hub_id", ondelete="CASCADE"),
@@ -45,6 +45,4 @@ class Node(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<Node(id={self.node_id}, hub={self.hub_id}, max_power={self.max_power_kw}kW)>"
-        )
+        return f"<Node(id={self.node_id}, hub={self.hub_id}, max_power={self.max_power_kw}kW)>"

@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 
 from ..repositories.base import NotFoundError
-from ..schemas import DLMEventLog, DLMEventResponse, DLMEventListResponse
+from ..schemas import DLMEventListResponse, DLMEventLog, DLMEventResponse
 from .dependencies import DLMServiceDep
 
 router = APIRouter(prefix="/dlm", tags=["Dynamic Load Management"])

@@ -4,8 +4,8 @@ from typing import Any, Sequence
 from sqlalchemy import and_, func, select
 
 from ..models import DLMEvent
-from .base import BaseRepository
 from ..schemas import DLMEventCreate
+from .base import BaseRepository
 
 
 class DLMEventRepository(BaseRepository[DLMEvent, DLMEventCreate, dict[str, Any]]):

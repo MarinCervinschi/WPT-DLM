@@ -6,16 +6,13 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # ==================== Base Schema ====================
 
 
 class NodeBase(BaseModel):
     """Base schema with common Node fields."""
 
-    name: Optional[str] = Field(
-        None, max_length=100, description="Human-readable name"
-    )
+    name: Optional[str] = Field(None, max_length=100, description="Human-readable name")
     max_power_kw: float = Field(
         22.0, gt=0, le=350, description="Maximum power output in kW"
     )
@@ -61,9 +58,7 @@ class NodeDetailResponse(NodeResponse):
 
     active_session_count: int = Field(0, description="Number of active sessions")
     total_sessions: int = Field(0, description="Total number of sessions")
-    total_energy_delivered_kwh: float = Field(
-        0.0, description="Total energy delivered"
-    )
+    total_energy_delivered_kwh: float = Field(0.0, description="Total energy delivered")
 
 
 class NodeListResponse(BaseModel):

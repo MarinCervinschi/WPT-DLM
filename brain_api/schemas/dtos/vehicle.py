@@ -7,7 +7,6 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # ==================== Base Schema ====================
 
 
@@ -61,9 +60,7 @@ class VehicleDetailResponse(VehicleResponse):
     """Schema for detailed Vehicle response with session stats."""
 
     total_sessions: int = Field(0, description="Total number of charging sessions")
-    total_energy_consumed_kwh: float = Field(
-        0.0, description="Total energy consumed"
-    )
+    total_energy_consumed_kwh: float = Field(0.0, description="Total energy consumed")
     last_charging_session: Optional[datetime] = Field(
         None, description="Last charging session start time"
     )

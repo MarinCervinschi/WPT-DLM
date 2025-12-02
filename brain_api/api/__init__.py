@@ -2,14 +2,14 @@
 API module - FastAPI routers and dependencies.
 """
 
-from . import health, hubs, nodes, vehicles, sessions, dlm
+from . import dlm, health, hubs, nodes, sessions, vehicles
 from .dependencies import (
+    ChargingSessionServiceDep,
     DBSession,
+    DLMServiceDep,
     HubServiceDep,
     NodeServiceDep,
     VehicleServiceDep,
-    ChargingSessionServiceDep,
-    DLMServiceDep,
 )
 
 __all__ = [

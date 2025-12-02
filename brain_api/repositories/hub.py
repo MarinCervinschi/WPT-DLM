@@ -5,8 +5,8 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.orm import selectinload
 
 from ..models import Hub
-from .base import BaseRepository
 from ..schemas import HubCreate, HubUpdate
+from .base import BaseRepository
 
 
 class HubRepository(BaseRepository[Hub, HubCreate, HubUpdate]):

@@ -1,11 +1,18 @@
 from ..models import Vehicle
 from ..repositories import VehicleRepository
-from ..schemas import VehicleCreate, VehicleUpdate, VehicleResponse, VehicleListResponse
+from ..schemas import VehicleCreate, VehicleListResponse, VehicleResponse, VehicleUpdate
 from .base import BaseService
 
 
 class VehicleService(
-    BaseService[Vehicle, VehicleRepository, VehicleCreate, VehicleUpdate, VehicleResponse, VehicleListResponse]
+    BaseService[
+        Vehicle,
+        VehicleRepository,
+        VehicleCreate,
+        VehicleUpdate,
+        VehicleResponse,
+        VehicleListResponse,
+    ]
 ):
     """Service layer for Vehicle operations."""
 

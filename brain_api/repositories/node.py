@@ -4,8 +4,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from ..models import Node
-from .base import BaseRepository
 from ..schemas import NodeCreate, NodeUpdate
+from .base import BaseRepository
 
 
 class NodeRepository(BaseRepository[Node, NodeCreate, NodeUpdate]):
