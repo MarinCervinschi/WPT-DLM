@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .api import health
+from .api import health, hubs, nodes, vehicles, sessions, dlm
 from .core.config import settings
 from .core.logging import setup_logging
 from .db import init_db
@@ -79,6 +79,11 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 
 # Include routers
 app.include_router(health.router, tags=["Health"])
+app.include_router(hubs.router, tags=["Hubs"])
+app.include_router(nodes.router, tags=["Nodes"])
+app.include_router(vehicles.router, tags=["Vehicles"])
+app.include_router(sessions.router, tags=["Charging Sessions"])
+app.include_router(dlm.router, tags=["Dynamic Load Management"])
 
 
 @app.get("/", summary="Root Endpoint", description="Get basic API information")
