@@ -513,6 +513,13 @@
         "pieType": "pie",
         "tooltip": {
           "mode": "single"
+        },
+        "reduceOptions": {
+          "values": true,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
         }
       }
     },
