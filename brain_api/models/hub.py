@@ -46,4 +46,4 @@ class Hub(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<Hub(id={self.id}, active={self.is_active}, nodes={len(self.nodes or [])})>"
+        return f"<Hub(id={self.hub_id}, active={self.is_active}, nodes={len(self.nodes or [])})>"

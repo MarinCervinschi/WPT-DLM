@@ -32,4 +32,4 @@ class Vehicle(Base):
     sessions = relationship("ChargingSession", back_populates="vehicle")
 
     def __repr__(self) -> str:
-        return f"<Vehicle(id={self.id}, model={self.model}, manufacturer={self.manufacturer})>"
+        return f"<Vehicle(id={self.vehicle_id}, model={self.model}, manufacturer={self.manufacturer})>"

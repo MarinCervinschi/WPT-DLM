@@ -46,5 +46,5 @@ class Node(Base):
 
     def __repr__(self) -> str:
         return (
-            f"<Node(id={self.id}, hub={self.hub_id}, max_power={self.max_power_kw}kW)>"
+            f"<Node(id={self.node_id}, hub={self.hub_id}, max_power={self.max_power_kw}kW)>"
         )

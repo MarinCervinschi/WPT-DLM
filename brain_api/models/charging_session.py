@@ -68,7 +68,7 @@ class ChargingSession(Base):
     vehicle = relationship("Vehicle", back_populates="sessions")
 
     def __repr__(self) -> str:
-        return f"<ChargingSession(id={self.id}, node={self.node_id}, energy={self.total_energy_kwh}kWh)>"
+        return f"<ChargingSession(id={self.charging_session_id}, node={self.node_id}, energy={self.total_energy_kwh}kWh)>"
 
     @property
     def is_active(self) -> bool:

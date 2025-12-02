@@ -76,7 +76,7 @@ class DLMEvent(Base):
     node = relationship("Node", back_populates="dlm_events")
 
     def __repr__(self) -> str:
-        return f"<DLMEvent(id={self.id}, reason={self.trigger_reason}, {self.original_limit_kw}->{self.new_limit_kw}kW)>"
+        return f"<DLMEvent(id={self.dlm_event_id}, reason={self.trigger_reason}, {self.original_limit_kw}->{self.new_limit_kw}kW)>"
 
     @property
     def limit_change_kw(self) -> float:
