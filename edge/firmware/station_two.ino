@@ -1,4 +1,4 @@
-/* DLM Charging Node - Station One
+/* DLM Charging Node - Station Two
     It manages the optical charging simulation. It detects the presence of the vehicle,
     monitors the power/current delivered, and displays the status on an LCD display.
     It communicates with the Raspberry Pi via I2C protocol.
@@ -16,7 +16,7 @@
 #include <LiquidCrystal_I2C.h>
 
 // Configuration I2C
-const byte SLAVE_ADDRESS = 8;
+const byte SLAVE_ADDRESS = 9;
 
 // Hardware Pins Definition
 const int TRIGGER_PIN = 2;
@@ -64,7 +64,7 @@ void setup()
 
     // Startup Message
     statusDisplay.setCursor(0, 0);
-    statusDisplay.print("STATION 1");
+    statusDisplay.print("STATION 2");
     statusDisplay.setCursor(0, 1);
     statusDisplay.print("INITIALIZING...");
 
@@ -125,18 +125,18 @@ void updateStatusDisplay() {
     
     if (isVehiclePresent == 1) {
         if (isAuthorized == 1) {
-            statusDisplay.print("STATION 1 - CHARGING...");
+            statusDisplay.print("STATION 2 - CHARGING...");
             statusDisplay.setCursor(0, 1);
             statusDisplay.print("P:"); statusDisplay.print((int)calculatedPower_mW);
             statusDisplay.print("mW L:"); statusDisplay.print(map(currentPowerLevel, 0, 255, 0, 100));
             statusDisplay.print("%");
         } else {
-            statusDisplay.print("STATION 1 - VEHICLE DETECTED");
+            statusDisplay.print("STATION 2 - VEHICLE DETECTED");
             statusDisplay.setCursor(0, 1);
             statusDisplay.print("SCAN QR CODE...");
         }
     } else {
-        statusDisplay.print("STATION 1 - READY");
+        statusDisplay.print("STATION 2 - READY");
         statusDisplay.setCursor(0, 1);
         statusDisplay.print("WAITING VEHICLE");
     }
