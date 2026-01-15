@@ -17,13 +17,14 @@ const int BLUE_LED_PIN = 11;
 
 // System Constants
 const unsigned long UPDATE_INTERVAL = 100; 
-const int NO_LIGHT_THRESHOLD = 50;  
-const int MID_LIGHT_THRESHOLD = 500; 
-const int HIGH_LIGHT_THRESHOLD = 950;
+const int NO_LIGHT_THRESHOLD = 0;  
+const int LOW_LIGHT_THRESHOLD = 35; 
+const int MID_LIGHT_THRESHOLD = 65;
 
 // State Variables
 unsigned long lastUpdateTime = 0;
 int measuredLight = 0;
+int lightPercent = 0; 
 
 void setup() {
     pinMode(RED_LED_PIN, OUTPUT);
@@ -41,31 +42,36 @@ void loop() {
         // 1. Reads how much light arrives from the station panel
         measuredLight = analogRead(PHOTO_SENSOR_PIN);
 
+        // 2. Convert raw value to percentage (0–100)
+        lightPercent = (measuredLight * 100) / 1023;
+
         // 2. Manages visual feedback based on the received POWER
         updatePowerStatusLed();
 
         // 3. Debug to calibrate thresholds based on ambient light
         Serial.print("Received Light: ");
         Serial.println(measuredLight);
+        Serial.print("Light Percentage: ");
+        Serial.println(lightPercent);
     }
 }
 
 void updatePowerStatusLed() {
-    if (measuredLight < NO_LIGHT_THRESHOLD) {
+    if (lightPercent == NO_LIGHT_THRESHOLD) {
         // Station Off or Unauthorized: LED Off
         setRgbColor(0, 0, 0);
     } 
-    else if (measuredLight >= HIGH_LIGHT_THRESHOLD) {
-        // HIGH POWER: Red LED
-        setRgbColor(255, 0, 0);
-    } 
-    else if (measuredLight >= MID_LIGHT_THRESHOLD) {
-        // MEDIUM POWER: Yellow LED (Red + Green)
-        setRgbColor(255, 255, 0);
-    } 
-    else {
-        // LOW POWER: Green LED
+    else if (lightPercent <= LOW_LIGHT_THRESHOLD) {
+        // LOW POWER: Green (1% - 35%)
         setRgbColor(0, 255, 0);
+    }
+    else if (lightPercent <= MID_LIGHT_THRESHOLD) {
+        // MEDIUM POWER: Yellow (36% - 65%)
+        setRgbColor(255, 255, 0);
+    }
+    else {
+        // HIGH POWER: Red (66% - 100%)
+        setRgbColor(255, 0, 0);
     }
 }
 
