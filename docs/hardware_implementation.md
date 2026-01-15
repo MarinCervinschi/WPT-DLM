@@ -37,7 +37,7 @@ The **INA219** sensors provide the critical dataset for the predictive model. Ev
 ## Tinkercad Simulation
 To facilitate rapid prototyping and testing, the entire DLMS setup is replicated in **Tinkercad**. 
 
-### Cyrcuit A -> Master Node & Station 1
+### Cyrcuit A -> DLM hub
 
 - **Communication between Raspberry Pi and Arduino UNO**
     The communication between the Raspberry Pi and Arduino UNO is simulated using two arduinos, because Tinkercad does not support Raspberry Pi simulation. 
@@ -73,10 +73,21 @@ To facilitate rapid prototyping and testing, the entire DLMS setup is replicated
     - **GND** -> ground line of the breadboard
     - **SDA** -> line 60 of the breadboard
     - **SCL** -> line 61 of the breadboard
+> In real implementation, the INA219 Current Sensor would be connected between the power supply and the L298N Driver Module to monitor voltage and current.
 
+![Circuit A - DLM Hub](../docs/images/dlm_hub_circuit.png)
 
 ### Circuit B -> Smart Vehicle
 - **Photoresistor (LDR)**
-    - Catod -> power line of the breadboard
-    - Other leg -> pin A0 of Arduino Nano and to a resistor of 10k ohm
-    - Resistor of 10k ohm -> ground line of the breadboard
+    - **Catod** -> power line of the breadboard
+    - **Other leg** -> pin A0 of Arduino Nano and to a resistor of 10k ohm
+    - **Resistor of 10k ohm** -> ground line of the breadboard
+- **RGB / Status LEDs**
+    - **Red Pin:** Connected to pin 9 of Arduino Nano through a resistor of 220 ohm
+    - **Green Pin:** Connected to pin 10 of Arduino Nano through a resistor of 220 ohm
+    - **Blue Pin:** Connected to pin 11 of Arduino Nano through a resistor of 220 ohm
+- **9V Battery**
+    - **Positive** -> Vin of Arduino Nano
+    - **Negative** -> GND of Arduino Nano
+
+![Circuit B - Smart Vehicle](../docs/images/car_circuit.png)
