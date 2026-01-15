@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: 'WPT-DLM Dashboards'
+    orgId: 1
+    folder: 'WPT-DLM'
+    folderUid: 'wpt-dlm'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
