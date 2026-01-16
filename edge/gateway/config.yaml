@@ -1,0 +1,57 @@
+# ===========================================================================
+# DLM Gateway Configuration
+# ===========================================================================
+mqtt:
+  broker: "localhost"
+  port: 1883
+  qos: 0
+
+telemetry:
+  publish_interval_seconds: 2
+
+# ===========================================================================
+# Gateway Hubs and Nodes Configuration
+# ===========================================================================
+hubs:
+  # Hub 1 - Simulated/Physical hub
+  - hub_id: "hub_01"
+    type: "simulated"  
+    max_power_kw: 50.0  
+    policy: "equal_sharing"  
+    nodes:
+      - node_id: "station_1"
+        max_power_kw: 40.0
+      - node_id: "station_2"
+        max_power_kw: 40.0
+  
+  # Hub 2 - Simulated hub for testing/demo
+  - hub_id: "hub_02"
+    type: "simulated"
+    max_power_kw: 30.0
+    policy: "equal_sharing"
+    nodes:
+      - node_id: "station_1"
+        max_power_kw: 11.0
+      - node_id: "station_2"
+        max_power_kw: 11.0
+      - node_id: "station_3"
+        max_power_kw: 7.4
+  
+  # Hub 3 - Additional hub
+  - hub_id: "hub_03"
+    type: "simulated"
+    max_power_kw: 60.0
+    policy: "priority"  
+    nodes:
+      - node_id: "station_1"
+        max_power_kw: 22.0
+      - node_id: "station_2"
+        max_power_kw: 22.0
+      - node_id: "station_3"
+        max_power_kw: 22.0
+      - node_id: "station_4"
+        max_power_kw: 11.0 
+
+logging:
+  level: "DEBUG"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
