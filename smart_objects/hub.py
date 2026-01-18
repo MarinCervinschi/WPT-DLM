@@ -230,6 +230,8 @@ class Hub(SmartObject):
                 # Manually trigger info publishing by notifying with message_type
                 info = node_resource.get_info()
                 node_resource.notify_update(updated_value=info, message_type="info")
+                state = node_resource.get_status()
+                node_resource.notify_update(updated_value=state, message_type="status")
 
         # Start DLM service (subscribes to requests and starts periodic thread)
         self.dlm_service.start()
