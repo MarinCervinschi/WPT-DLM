@@ -1,0 +1,1 @@
+# Smart Objects sensors package
