@@ -1,11 +1,11 @@
 import json
 import logging
 import threading
-from typing import Dict, List, Optional, Callable
+from typing import Callable, Dict, List, Optional
+
+from core.mqtt_dtos.dlm_dto import DLMNotification, VehicleRequest
+from core.policies import DLMPolicy, PolicyManager, PowerAllocation
 from core.services.mqtt_service import MQTTService
-from core.policies import PolicyManager, DLMPolicy, PowerAllocation
-from core.mqtt_dtos.dlm_dto import VehicleRequest
-from core.mqtt_dtos.dlm_dto import DLMNotification
 
 
 class DLMService:

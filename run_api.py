@@ -1,4 +1,5 @@
 import uvicorn
+
 from brain_api.core.config import settings
 
 if __name__ == "__main__":

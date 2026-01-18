@@ -1,4 +1,4 @@
-from .services import MQTTService, DLMService
+from .services import DLMService, MQTTService
 
 __all__ = [
     "MQTTService",

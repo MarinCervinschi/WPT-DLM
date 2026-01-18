@@ -1,4 +1,5 @@
 from typing import ClassVar, List
+
 from smart_objects.models import Actuator
 
 

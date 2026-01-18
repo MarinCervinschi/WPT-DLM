@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, List, Optional
-from pydantic import BaseModel
 import json
 import logging
+from abc import ABC, abstractmethod
+from typing import Any, List, Optional
+
+from pydantic import BaseModel
 
 
 class ResourceDataListener(ABC):

@@ -35,7 +35,9 @@ class MQTTService:
         """Callback for when the client connects to the broker."""
         if rc == 0:
             self._connected = True
-            logger.info(f"Connected to MQTT broker at {self.broker_host}:{self.broker_port}")
+            logger.info(
+                f"Connected to MQTT broker at {self.broker_host}:{self.broker_port}"
+            )
         else:
             self._connected = False
             logger.error(f"Failed to connect to MQTT broker. Return code: {rc}")
@@ -44,7 +46,9 @@ class MQTTService:
         """Callback for when the client disconnects from the broker."""
         self._connected = False
         if rc != 0:
-            logger.warning(f"Unexpected disconnection from MQTT broker. Return code: {rc}")
+            logger.warning(
+                f"Unexpected disconnection from MQTT broker. Return code: {rc}"
+            )
         else:
             logger.info("Disconnected from MQTT broker")
 
@@ -66,7 +70,9 @@ class MQTTService:
         self.client.loop_stop()
         self.client.disconnect()
 
-    def publish(self, topic: str, payload: str, qos: int = 0, retain: bool = False) -> None:
+    def publish(
+        self, topic: str, payload: str, qos: int = 0, retain: bool = False
+    ) -> None:
         """
         Publish a message to a topic.
 
@@ -86,7 +92,9 @@ class MQTTService:
         else:
             logger.error(f"Failed to publish to '{topic}'. Return code: {result.rc}")
 
-    def subscribe(self, topic: str, callback: Optional[Callable] = None, qos: int = 0) -> None:
+    def subscribe(
+        self, topic: str, callback: Optional[Callable] = None, qos: int = 0
+    ) -> None:
         """
         Subscribe to a topic.
 
@@ -96,7 +104,9 @@ class MQTTService:
             qos: Quality of Service (0, 1, or 2)
         """
         if callback:
-            self.client.message_callback_add(topic, lambda client, userdata, msg: callback(msg))
+            self.client.message_callback_add(
+                topic, lambda client, userdata, msg: callback(msg)
+            )
 
         result = self.client.subscribe(topic, qos=qos)
         if result[0] == mqtt.MQTT_ERR_SUCCESS:
@@ -115,7 +125,9 @@ class MQTTService:
         if result[0] == mqtt.MQTT_ERR_SUCCESS:
             logger.info(f"Unsubscribed from topic: {topic}")
         else:
-            logger.error(f"Failed to unsubscribe from '{topic}'. Return code: {result[0]}")
+            logger.error(
+                f"Failed to unsubscribe from '{topic}'. Return code: {result[0]}"
+            )
 
     @property
     def is_connected(self) -> bool:

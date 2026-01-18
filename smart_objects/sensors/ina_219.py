@@ -1,6 +1,7 @@
-from smart_objects.models import Sensor
-import time
 import random
+import time
+
+from smart_objects.models import Sensor
 
 
 class INA219Sensor(Sensor):

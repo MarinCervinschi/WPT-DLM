@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, timezone
 
-from .enums import GeoLocation, ConnectionState
+from pydantic import BaseModel, Field, field_validator
+
+from .enums import ConnectionState, GeoLocation
 
 
 class HubInfo(BaseModel):
