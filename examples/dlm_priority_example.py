@@ -4,11 +4,26 @@ Example demonstrating DLM with vehicle requests and policy execution.
 
 import json
 import time
+import sys
+from pathlib import Path
 
-from core.mqtt_dtos.enums import GeoLocation
+# Add project root to path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from core.mqtt_dtos import GeoLocation
 from core.policies import PriorityPolicy
 from core.services.mqtt_service import MQTTService
 from smart_objects.hub import Hub
+
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger("dlm_priority_example")
 
 
 def simulate_cloud_request(mqtt_service: MQTTService, hub_id: str, vehicle_data: dict):
@@ -25,6 +40,11 @@ def main():
         broker_host="localhost", broker_port=1883, client_id="hub_01"
     )
     mqtt_service.connect()
+    time.sleep(1)  # Wait for connection
+
+    if not mqtt_service.is_connected:
+        print("❌ Failed to connect to MQTT broker. Exiting.")
+        return
 
     # Create a Hub with Priority DLM policy
     hub = Hub(
