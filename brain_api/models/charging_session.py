@@ -23,13 +23,6 @@ class ChargingSession(Base):
     """
 
     __tablename__ = "charging_sessions"
-    __table_args__ = (
-        CheckConstraint("total_energy_kwh >= 0", name="check_energy_non_negative"),
-        CheckConstraint("avg_power_kw >= 0", name="check_avg_power_non_negative"),
-        CheckConstraint(
-            "end_time IS NULL OR end_time >= start_time", name="check_end_after_start"
-        ),
-    )
 
     charging_session_id = Column(
         Integer, primary_key=True, index=True, autoincrement=True

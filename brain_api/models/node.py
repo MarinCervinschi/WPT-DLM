@@ -12,11 +12,6 @@ class Node(Base):
     """
 
     __tablename__ = "nodes"
-    __table_args__ = (
-        CheckConstraint(
-            "max_power_kw > 0 AND max_power_kw <= 350", name="check_max_power_range"
-        ),
-    )
 
     node_id = Column(String(50), primary_key=True, index=True)
     hub_id = Column(
@@ -26,7 +21,6 @@ class Node(Base):
         index=True,
     )
 
-    name = Column(String(100), nullable=True, comment="Human-readable name")
     max_power_kw = Column(
         Float,
         nullable=False,

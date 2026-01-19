@@ -14,13 +14,6 @@ class Hub(Base):
     """
 
     __tablename__ = "hubs"
-    __table_args__ = (
-        CheckConstraint("lat >= -90 AND lat <= 90", name="check_lat_range"),
-        CheckConstraint("lon >= -180 AND lon <= 180", name="check_lon_range"),
-        CheckConstraint("alt >= -500 AND alt <= 10000", name="check_alt_range"),
-        CheckConstraint("max_grid_capacity_kw > 0", name="check_max_grid_positive"),
-    )
-
     hub_id = Column(String(50), primary_key=True, index=True)
 
     # Geo Location
@@ -30,6 +23,12 @@ class Hub(Base):
 
     max_grid_capacity_kw = Column(
         Float, nullable=False, default=100.0, comment="Maximum grid capacity in kW"
+    )
+    ip_address = Column(
+        String(45), nullable=False, default="0.0.0.0", comment="IP Address"
+    )
+    firmware_version = Column(
+        String(20), nullable=False, default="1.0.0", comment="Firmware version"
     )
 
     is_active = Column(Boolean, nullable=False, default=True, server_default="true")
