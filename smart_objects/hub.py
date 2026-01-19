@@ -29,7 +29,7 @@ class Hub(SmartObject):
         hub_id: str,
         mqtt_service: MQTTService,
         location: GeoLocation,
-        max_power_kw: float = 100.0,
+        max_grid_capacity_kw: float = 100.0,
         ip_address: str = "0.0.0.0",
         firmware_version: str = "1.0.0",
         dlm_policy: Optional[DLMPolicy] = None,
@@ -39,7 +39,7 @@ class Hub(SmartObject):
 
         self.hub_id = hub_id
         self.location = location
-        self.max_power_kw = max_power_kw
+        self.max_grid_capacity_kw = max_grid_capacity_kw
         self.firmware_version = firmware_version
 
         # Hub state
@@ -48,7 +48,7 @@ class Hub(SmartObject):
         self.cpu_temp: float = 0.0
 
         # DLM Service
-        policy = dlm_policy or EqualSharingPolicy(max_grid_capacity_kw=max_power_kw)
+        policy = dlm_policy or EqualSharingPolicy(max_grid_capacity_kw=max_grid_capacity_kw)
         self.dlm_service = DLMService(
             hub_id=hub_id,
             mqtt_service=mqtt_service,
@@ -99,7 +99,7 @@ class Hub(SmartObject):
         info = HubInfo(
             hub_id=self.hub_id,
             location=self.location,
-            max_power_kw=self.max_power_kw,
+            max_grid_capacity_kw=self.max_grid_capacity_kw,
             ip_address=self.ip_address,
             firmware_version=self.firmware_version,
         )

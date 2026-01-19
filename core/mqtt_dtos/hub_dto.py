@@ -13,8 +13,8 @@ class HubInfo(BaseModel):
 
     hub_id: str = Field(..., max_length=50, description="Unique hub identifier")
     location: GeoLocation = Field(..., description="Hub physical location")
-    max_power_kw: float = Field(
-        ..., ge=0, le=1000, description="Hub total capacity in kW"
+    max_grid_capacity_kw: float = Field(
+        ..., ge=0, le=1000, description="Hub grid capacity in kW"
     )
     ip_address: str = Field(
         ..., min_length=7, max_length=45, description="Hub IP address"
