@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from core.mqtt_dtos.dlm_dto import VehicleRequest
+from shared.mqtt_dtos.dlm_dto import VehicleRequest
 
 
 @dataclass

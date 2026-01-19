@@ -4,8 +4,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from core.mqtt_dtos.enums import ChargingState
-from core.mqtt_dtos.node_dto import NodeInfo, NodeStatus, NodeTelemetry
+from shared.mqtt_dtos.enums import ChargingState
+from shared.mqtt_dtos.node_dto import NodeInfo, NodeStatus, NodeTelemetry
 from smart_objects.actuators.l298n import L298NActuator
 from smart_objects.sensors.hc_sr04 import HC_SR04
 from smart_objects.sensors.ina_219 import INA219Sensor

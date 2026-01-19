@@ -6,7 +6,7 @@ Allocates power based on vehicle priority and SoC.
 
 from typing import Dict, List
 
-from core.mqtt_dtos.dlm_dto import VehicleRequest
+from shared.mqtt_dtos.dlm_dto import VehicleRequest
 
 from .dlm_policy import DLMPolicy, PowerAllocation
 

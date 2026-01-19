@@ -2,7 +2,7 @@
 Core policies for Dynamic Load Management.
 """
 
-from core.mqtt_dtos.dlm_dto import VehicleRequest
+from shared.mqtt_dtos.dlm_dto import VehicleRequest
 
 from .dlm_policy import DLMPolicy, PowerAllocation
 from .equal_sharing_policy import EqualSharingPolicy

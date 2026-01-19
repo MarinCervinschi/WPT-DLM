@@ -5,7 +5,7 @@ Policy Manager for Dynamic Load Management.
 import logging
 from typing import Dict, List, Optional
 
-from core.mqtt_dtos.dlm_dto import VehicleRequest
+from shared.mqtt_dtos.dlm_dto import VehicleRequest
 
 from .dlm_policy import DLMPolicy, PowerAllocation
 

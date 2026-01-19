@@ -5,7 +5,7 @@ from typing import Any, Dict, Literal
 
 from pydantic import BaseModel
 
-from core.services.mqtt_service import MQTTService
+from shared.services.mqtt_service import MQTTService
 from smart_objects.models import Actuator
 from smart_objects.resources.smart_object_resource import SmartObjectResource
 

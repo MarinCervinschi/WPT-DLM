@@ -1,14 +1,14 @@
 from typing import Dict, List, Optional
 
-from core.mqtt_dtos import (
+from shared.mqtt_dtos import (
     ChargingState,
     ConnectionState,
     GeoLocation,
     HubInfo,
     HubStatus,
 )
-from core.policies import DLMPolicy, EqualSharingPolicy, PowerAllocation
-from core.services import DLMService, MQTTService
+from shared.policies import DLMPolicy, EqualSharingPolicy, PowerAllocation
+from shared.services import DLMService, MQTTService
 from smart_objects.resources import Node, SmartObject
 
 
