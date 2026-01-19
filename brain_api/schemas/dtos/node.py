@@ -12,7 +12,6 @@ from pydantic import BaseModel, ConfigDict, Field
 class NodeBase(BaseModel):
     """Base schema with common Node fields."""
 
-    name: Optional[str] = Field(None, max_length=100, description="Human-readable name")
     max_power_kw: float = Field(
         22.0, gt=0, le=350, description="Maximum power output in kW"
     )
