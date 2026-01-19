@@ -3,7 +3,7 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from ..models import DLMEvent
+from ..models import DLMEventDbo
 from ..repositories import DLMEventRepository, HubRepository, NodeRepository
 from ..schemas import (
     DLMEventCreate,
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class DLMService(
     BaseService[
-        DLMEvent,
+        DLMEventDbo,
         DLMEventRepository,
         DLMEventCreate,
         DLMEventCreate,  # No update for events

@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from ..db import Base
 
 
-class Vehicle(Base):
+class VehicleDbo(Base):
     """
     The Vehicle (Guest) - electric vehicle that uses charging infrastructure.
     """
@@ -29,7 +29,7 @@ class Vehicle(Base):
         server_default=func.now(),
     )
 
-    sessions = relationship("ChargingSession", back_populates="vehicle")
+    sessions = relationship("ChargingSessionDbo", back_populates="vehicle")
 
     def __repr__(self) -> str:
-        return f"<Vehicle(id={self.vehicle_id}, model={self.model}, manufacturer={self.manufacturer})>"
+        return f"<VehicleDbo(id={self.vehicle_id}, model={self.model}, manufacturer={self.manufacturer})>"

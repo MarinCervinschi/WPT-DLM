@@ -1,10 +1,10 @@
-from sqlalchemy import Boolean, CheckConstraint, Column, Float, ForeignKey, String
+from sqlalchemy import Boolean, Column, Float, ForeignKey, String
 from sqlalchemy.orm import relationship
 
 from ..db import Base
 
 
-class Node(Base):
+class NodeDbo(Base):
     """
     The Node (Charging Point) - individual charging station.
 
@@ -30,12 +30,12 @@ class Node(Base):
 
     is_maintenance = Column(Boolean, nullable=False, default=False)
 
-    hub = relationship("Hub", back_populates="nodes")
+    hub = relationship("HubDbo", back_populates="nodes")
     sessions = relationship(
-        "ChargingSession", back_populates="node", cascade="all, delete-orphan"
+        "ChargingSessionDbo", back_populates="node", cascade="all, delete-orphan"
     )
     dlm_events = relationship(
-        "DLMEvent", back_populates="node", cascade="all, delete-orphan"
+        "DLMEventDbo", back_populates="node", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:

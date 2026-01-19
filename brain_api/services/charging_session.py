@@ -3,7 +3,7 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from ..models import ChargingSession
+from ..models import ChargingSessionDbo
 from ..repositories import ChargingSessionRepository, NodeRepository, VehicleRepository
 from ..schemas import (
     ChargingSessionCreate,
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class ChargingSessionService(
     BaseService[
-        ChargingSession,
+        ChargingSessionDbo,
         ChargingSessionRepository,
         ChargingSessionCreate,
         ChargingSessionUpdate,

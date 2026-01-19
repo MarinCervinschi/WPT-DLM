@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import (
-    CheckConstraint,
     Column,
     DateTime,
     Float,
@@ -15,7 +14,7 @@ from sqlalchemy.orm import relationship
 from ..db import Base
 
 
-class ChargingSession(Base):
+class ChargingSessionDbo(Base):
     """
     Charging Session - represents a single charging event.
 
@@ -57,11 +56,11 @@ class ChargingSession(Base):
         Float, nullable=False, default=0.0, comment="Average power during session in kW"
     )
 
-    node = relationship("Node", back_populates="sessions")
-    vehicle = relationship("Vehicle", back_populates="sessions")
+    node = relationship("NodeDbo", back_populates="sessions")
+    vehicle = relationship("VehicleDbo", back_populates="sessions")
 
     def __repr__(self) -> str:
-        return f"<ChargingSession(id={self.charging_session_id}, node={self.node_id}, energy={self.total_energy_kwh}kWh)>"
+        return f"<ChargingSessionDbo(id={self.charging_session_id}, node={self.node_id}, energy={self.total_energy_kwh}kWh)>"
 
     @property
     def is_active(self) -> bool:

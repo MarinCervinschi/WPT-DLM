@@ -1,4 +1,4 @@
-from ..models import Vehicle
+from ..models import VehicleDbo
 from ..repositories import VehicleRepository
 from ..schemas import VehicleCreate, VehicleListResponse, VehicleResponse, VehicleUpdate
 from .base import BaseService
@@ -6,7 +6,7 @@ from .base import BaseService
 
 class VehicleService(
     BaseService[
-        Vehicle,
+        VehicleDbo,
         VehicleRepository,
         VehicleCreate,
         VehicleUpdate,

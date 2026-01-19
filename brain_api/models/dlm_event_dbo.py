@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import (
-    CheckConstraint,
     Column,
     DateTime,
     Float,
@@ -15,7 +14,7 @@ from sqlalchemy.orm import relationship
 from ..db import Base
 
 
-class DLMEvent(Base):
+class DLMEventDbo(Base):
     """
     DLM Event - Dynamic Load Management decision log.
 
@@ -24,13 +23,6 @@ class DLMEvent(Base):
     """
 
     __tablename__ = "dlm_events"
-    __table_args__ = (
-        CheckConstraint("total_grid_load_kw >= 0", name="check_load_non_negative"),
-        CheckConstraint(
-            "original_limit_kw >= 0", name="check_original_limit_non_negative"
-        ),
-        CheckConstraint("new_limit_kw >= 0", name="check_new_limit_non_negative"),
-    )
 
     dlm_event_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
 
@@ -72,11 +64,11 @@ class DLMEvent(Base):
     )
     new_limit_kw = Column(Float, nullable=False, comment="Power limit after adjustment")
 
-    hub = relationship("Hub", back_populates="dlm_events")
-    node = relationship("Node", back_populates="dlm_events")
+    hub = relationship("HubDbo", back_populates="dlm_events")
+    node = relationship("NodeDbo", back_populates="dlm_events")
 
     def __repr__(self) -> str:
-        return f"<DLMEvent(id={self.dlm_event_id}, reason={self.trigger_reason}, {self.original_limit_kw}->{self.new_limit_kw}kW)>"
+        return f"<DLMEventDbo(id={self.dlm_event_id}, reason={self.trigger_reason}, {self.original_limit_kw}->{self.new_limit_kw}kW)>"
 
     @property
     def limit_change_kw(self) -> float:

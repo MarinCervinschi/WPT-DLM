@@ -1,12 +1,12 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, Float, String, func
+from sqlalchemy import Boolean, Column, DateTime, Float, String, func
 from sqlalchemy.orm import relationship
 
 from ..db import Base
 
 
-class Hub(Base):
+class HubDbo(Base):
     """
     The Hub (Edge Gateway) - manages multiple charging nodes.
 
@@ -39,9 +39,9 @@ class Hub(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    nodes = relationship("Node", back_populates="hub", cascade="all, delete-orphan")
+    nodes = relationship("NodeDbo", back_populates="hub", cascade="all, delete-orphan")
     dlm_events = relationship(
-        "DLMEvent", back_populates="hub", cascade="all, delete-orphan"
+        "DLMEventDbo", back_populates="hub", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
