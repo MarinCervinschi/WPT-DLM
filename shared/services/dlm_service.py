@@ -4,7 +4,7 @@ import threading
 from typing import Callable, Dict, List, Optional
 
 from shared.mqtt_dtos.dlm_dto import DLMNotification, VehicleRequest
-from shared.policies import DLMPolicy, PolicyManager, PowerAllocation
+from shared.policies import IPolicy, PowerAllocation
 from shared.services.mqtt_service import MQTTService
 
 
@@ -24,7 +24,7 @@ class DLMService:
         self,
         hub_id: str,
         mqtt_service: MQTTService,
-        policy: DLMPolicy,
+        policy: IPolicy,
         dlm_interval: float = 5.0,
     ):
         """
@@ -33,13 +33,13 @@ class DLMService:
         Args:
             hub_id: Hub identifier
             mqtt_service: MQTT service for pub/sub
-            policy: DLM policy to use
+            policy: IPolicy to use
             dlm_interval: Interval for periodic policy execution (seconds)
         """
         self.hub_id = hub_id
         self.mqtt_service = mqtt_service
-        self.policy_manager = PolicyManager(policy)
         self.dlm_interval = dlm_interval
+        self.policy = policy
 
         self.logger = logging.getLogger(f"DLMService-{hub_id}")
 
@@ -105,7 +105,6 @@ class DLMService:
             try:
                 payload = json.loads(msg.payload.decode())
 
-                # Parse and validate request using Pydantic
                 request = VehicleRequest(**payload)
 
                 self.logger.info(
@@ -113,14 +112,9 @@ class DLMService:
                     f"{request.node_id} (SoC: {request.soc_percent}%, Priority: {request.priority})"
                 )
 
-                # Add request to policy manager
-                self.policy_manager.add_vehicle_request(request)
-
-                # Handle vehicle assignment (update node, start charging)
                 if self._handle_vehicle_assignment_callback:
                     self._handle_vehicle_assignment_callback(request)
 
-                # Apply DLM policy immediately (event-driven)
                 self.apply_policy()
 
             except Exception as e:
@@ -128,26 +122,6 @@ class DLMService:
 
         self.mqtt_service.subscribe(request_topic, callback=on_vehicle_request, qos=1)
         self.logger.info(f"🔔 Subscribed to {request_topic}")
-
-    def add_vehicle_request(self, request: VehicleRequest) -> None:
-        """
-        Add a vehicle request manually (not from MQTT).
-
-        Args:
-            request: Vehicle charging request
-        """
-        self.policy_manager.add_vehicle_request(request)
-        self.apply_policy()
-
-    def remove_vehicle_request(self, vehicle_id: str) -> None:
-        """
-        Remove a vehicle request.
-
-        Args:
-            vehicle_id: ID of the vehicle to remove
-        """
-        self.policy_manager.remove_vehicle_request(vehicle_id)
-        self.apply_policy()
 
     def apply_policy(self) -> List[PowerAllocation]:
         """
@@ -160,11 +134,9 @@ class DLMService:
             self.logger.warning("Callbacks not set, cannot apply policy")
             return []
 
-        # Get current nodes state
         nodes_state = self._get_nodes_state_callback()
 
-        # Apply policy to get allocations
-        allocations = self.policy_manager.apply_policy(nodes_state)
+        allocations = self.policy(nodes_state)
 
         # Apply allocations and publish notifications for changes
         for alloc in allocations:
@@ -249,7 +221,7 @@ class DLMService:
             )
             self._dlm_thread.start()
             self.logger.info(
-                f"🟢 Started DLM service (policy: {self.policy_manager.policy.get_policy_name()}, "
+                f"🟢 Started DLM service (policy: {self.policy.get_policy_name()}, "
                 f"interval: {self.dlm_interval}s)"
             )
 
@@ -259,7 +231,3 @@ class DLMService:
             self._stop_dlm.set()
             self._dlm_thread.join(timeout=5)
             self.logger.info("🔴 Stopped DLM service")
-
-    def get_active_requests(self) -> List[VehicleRequest]:
-        """Get all active vehicle requests."""
-        return self.policy_manager.get_active_requests()

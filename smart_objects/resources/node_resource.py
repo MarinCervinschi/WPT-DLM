@@ -1,8 +1,6 @@
 import threading
-import time
 from typing import Optional
 
-from pydantic import BaseModel
 
 from shared.mqtt_dtos.enums import ChargingState
 from shared.mqtt_dtos.node_dto import NodeInfo, NodeStatus, NodeTelemetry
@@ -26,7 +24,6 @@ class Node(SmartObjectResource):
     - L298N actuator: controls charging on/off and PWM level
     """
 
-    # Distance threshold for vehicle detection (cm)
     VEHICLE_DETECTION_THRESHOLD = 50.0  # Vehicle present if distance < 50cm
 
     def __init__(
@@ -41,22 +38,18 @@ class Node(SmartObjectResource):
         self.hub_id = hub_id
         self.max_power_kw = max_power_kw
 
-        # Sensors and actuators
         self.power_sensor = INA219Sensor(simulation=simulation)
         self.distance_sensor = HC_SR04(simulation=simulation)
         self.charging_actuator = L298NActuator(simulation=simulation)
 
-        # Current state
         self.current_state: ChargingState = ChargingState.IDLE
         self.error_code: int = 0
 
-        # Additional telemetry data
         self.power_limit_kw: float = max_power_kw
         self.is_occupied: bool = False
         self.connected_vehicle_id: Optional[str] = None
         self.current_vehicle_soc: Optional[int] = None
 
-        # Periodic update control
         self._telemetry_thread: Optional[threading.Thread] = None
         self._stop_telemetry = threading.Event()
         self._telemetry_interval: float = 2.0  # seconds
@@ -124,17 +117,13 @@ class Node(SmartObjectResource):
 
     def measure_sensors(self) -> None:
         """Read all sensor values and update telemetry."""
-        # Measure power sensor (INA219)
         self.power_sensor.measure()
 
-        # Measure distance sensor (HC-SR04)
         self.distance_sensor.measure()
         distance = self.distance_sensor.get_value("distance")
 
-        # Detect vehicle presence based on distance
         self.is_occupied = distance < self.VEHICLE_DETECTION_THRESHOLD
 
-        # Sensor values are in Watts, convert to kW
         power_w = self.power_sensor.get_value("power")
         self.logger.debug(
             f"📊 Sensor readings: "
@@ -191,10 +180,8 @@ class Node(SmartObjectResource):
         """Background thread for periodic telemetry updates."""
         while not self._stop_telemetry.is_set():
             try:
-                # Measure sensors first
                 self.measure_sensors()
 
-                # Then notify listeners with updated telemetry
                 self.notify_update(
                     updated_value=self.get_telemetry(), message_type="telemetry"
                 )

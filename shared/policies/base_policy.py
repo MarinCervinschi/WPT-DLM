@@ -1,12 +1,6 @@
-"""
-Dynamic Load Management (DLM) Policy Abstract Base Class.
-"""
-
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List, Optional
-
-from shared.mqtt_dtos.dlm_dto import VehicleRequest
+from typing import Dict, List
 
 
 @dataclass
@@ -18,7 +12,7 @@ class PowerAllocation:
     reason: str
 
 
-class DLMPolicy(ABC):
+class IPolicy(ABC):
     """
     Abstract base class for Dynamic Load Management policies.
 
@@ -36,9 +30,7 @@ class DLMPolicy(ABC):
         self.max_grid_capacity_kw = max_grid_capacity_kw
 
     @abstractmethod
-    def __call__(
-        self, nodes_state: Dict[str, Dict], vehicle_requests: List[VehicleRequest]
-    ) -> List[PowerAllocation]:
+    def __call__(self, nodes_state: Dict[str, Dict]) -> List[PowerAllocation]:
         """
         Compute power allocation for all nodes.
 
@@ -54,7 +46,6 @@ class DLMPolicy(ABC):
                         "is_occupied": True
                     }
                 }
-            vehicle_requests: List of vehicle charging requests
 
         Returns:
             List of power allocations for each node

@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from shared.mqtt_dtos import (
     ChargingState,
@@ -7,7 +7,7 @@ from shared.mqtt_dtos import (
     HubInfo,
     HubStatus,
 )
-from shared.policies import DLMPolicy, EqualSharingPolicy, PowerAllocation
+from shared.policies import IPolicy, EqualSharingPolicy, PowerAllocation
 from shared.services import DLMService, MQTTService
 from smart_objects.resources import Node, SmartObject
 
@@ -32,7 +32,7 @@ class Hub(SmartObject):
         max_grid_capacity_kw: float = 100.0,
         ip_address: str = "0.0.0.0",
         firmware_version: str = "1.0.0",
-        dlm_policy: Optional[DLMPolicy] = None,
+        dlm_policy: Optional[IPolicy] = None,
         dlm_interval: float = 5.0,
     ):
         super().__init__(object_id=hub_id, mqtt_service=mqtt_service)
@@ -48,7 +48,9 @@ class Hub(SmartObject):
         self.cpu_temp: float = 0.0
 
         # DLM Service
-        policy = dlm_policy or EqualSharingPolicy(max_grid_capacity_kw=max_grid_capacity_kw)
+        policy = dlm_policy or EqualSharingPolicy(
+            max_grid_capacity_kw=max_grid_capacity_kw
+        )
         self.dlm_service = DLMService(
             hub_id=hub_id,
             mqtt_service=mqtt_service,
