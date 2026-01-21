@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = 10
     DB_ECHO: bool = False  # SQL query logging
 
+    # MQTT Broker
+    MQTT_BROKER_HOST: str = "localhost"
+    MQTT_BROKER_PORT: int = 1883
+
     @computed_field
     @property
     def database_url(self) -> str:

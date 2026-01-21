@@ -6,11 +6,13 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .api import dlm, health, hubs, nodes, sessions, vehicles
+from .api import charging_request, dlm, health, hubs, nodes, sessions, vehicles
+from .api import dependencies
 from .core.config import settings
 from .core.logging import setup_logging
 from .db import init_db
 from .schemas import ErrorResponse
+from shared.services import MQTTService
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -21,6 +23,16 @@ async def lifespan(app: FastAPI):
     """Application lifespan events."""
     logger.info(f"Starting {settings.PROJECT_NAME} v{settings.VERSION}")
 
+    mqtt_service = MQTTService(
+        broker_host=settings.MQTT_BROKER_HOST,
+        broker_port=settings.MQTT_BROKER_PORT,
+        client_id="brain_api",
+    )
+    mqtt_service.connect()
+    
+    dependencies.set_mqtt_service(mqtt_service)
+    logger.info("MQTT service initialized successfully")
+
     try:
         init_db()
         logger.info("Database initialized successfully")
@@ -29,6 +41,8 @@ async def lifespan(app: FastAPI):
 
     yield
 
+    # Cleanup
+    mqtt_service.disconnect()
     logger.info(f"Shutting down {settings.PROJECT_NAME}")
 
 
@@ -84,6 +98,7 @@ app.include_router(nodes.router, tags=["Nodes"])
 app.include_router(vehicles.router, tags=["Vehicles"])
 app.include_router(sessions.router, tags=["Charging Sessions"])
 app.include_router(dlm.router, tags=["Dynamic Load Management"])
+app.include_router(charging_request.router, tags=["Charging Requests"])
 
 
 @app.get("/", summary="Root Endpoint", description="Get basic API information")

@@ -1,3 +1,7 @@
+from .dtos.charging_request import (
+    ChargingRequestCreate,
+    ChargingRequestResponse,
+)
 from .dtos.charging_session import (
     ChargingSessionBase,
     ChargingSessionCreate,
@@ -73,6 +77,9 @@ __all__ = [
     "VehicleResponse",
     "VehicleDetailResponse",
     "VehicleListResponse",
+    # ChargingRequest DTOs
+    "ChargingRequestCreate",
+    "ChargingRequestResponse",
     # ChargingSession DTOs
     "ChargingSessionBase",
     "ChargingSessionCreate",

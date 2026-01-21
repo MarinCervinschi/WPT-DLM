@@ -1,4 +1,5 @@
 from .base import BaseService
+from .charging_request import ChargingRequestService
 from .charging_session import ChargingSessionService
 from .dlm import DLMService
 from .hub import HubService
@@ -11,5 +12,6 @@ __all__ = [
     "NodeService",
     "VehicleService",
     "ChargingSessionService",
+    "ChargingRequestService",
     "DLMService",
 ]

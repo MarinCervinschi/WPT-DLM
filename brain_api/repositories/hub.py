@@ -4,7 +4,7 @@ from typing import Any, Sequence
 from sqlalchemy import and_, func, select
 from sqlalchemy.orm import selectinload
 
-from ..models import Hub
+from ..models import HubDbo as Hub
 from ..schemas import HubCreate, HubUpdate
 from .base import BaseRepository
 
