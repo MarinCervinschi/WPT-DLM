@@ -225,6 +225,8 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "min": 0,
+          "max": 150,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -233,15 +235,31 @@
                 "value": null
               },
               {
+                "color": "light-green",
+                "value": 30
+              },
+              {
                 "color": "yellow",
-                "value": 60
+                "value": 50
               },
               {
                 "color": "orange",
-                "value": 100
+                "value": 70
               },
               {
                 "color": "red",
+                "value": 90
+              },
+              {
+                "color": "dark-red",
+                "value": 110
+              },
+              {
+                "color": "purple",
+                "value": 130
+              },
+              {
+                "color": "black",
                 "value": 150
               }
             ]
