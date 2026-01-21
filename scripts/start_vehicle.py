@@ -126,6 +126,15 @@ def main():
         print("⚡ DLM will prioritize the low SoC vehicle...")
         time.sleep(10)
 
+        telemetry_data = VehicleTelemetry(
+            geo_location=GeoLocation(lat=44.6497, lon=10.9246, alt=50.0),
+            battery_level=80,
+            is_charging=False,
+            speed_kmh=15,
+            engine_temp_c=30.0,
+        )
+        simulate_vehicle_telemetry(mqtt_service, "vehicle_001", telemetry_data)
+
         print("\n" + "=" * 60)
         print("📊 DLM continues to rebalance power every 5 seconds")
         print("=" * 60 + "\n")
