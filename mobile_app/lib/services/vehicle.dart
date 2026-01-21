@@ -17,10 +17,10 @@ class ApiService {
     return prefs.getString('vehicle_id');
   }
 
-  //GET 
+  //GET
   Future<Map<String, dynamic>> getVehicleDetails(String vehicleId) async {
     final url = Uri.parse('$baseUrl/vehicles/$vehicleId');
-    
+
     try {
       final response = await http.get(url);
 
@@ -36,7 +36,6 @@ class ApiService {
       throw Exception("Unable to connect to the server: $e");
     }
   }
-
 
   //POST
   Future<void> registerVehicle(Vehicle vehicle) async {
@@ -60,28 +59,39 @@ class ApiService {
   }
 
   // POST - Associate vehicle to charging station
-  Future<void> associateVehicleToStation(String vehicleId, String stationId) async {
-    final url = Uri.parse('$baseUrl/sessions/start');
-
+  Future<bool> associateVehicleToStation(String qrCodeUrl) async {
     try {
+      final vehicleId = await getSavedVehicleId();
+
+      if (vehicleId == null) {
+        logger.w('No registered vehicle found for association.');
+        throw Exception(
+          'No registered vehicle. Please register your vehicle first.',
+        );
+      }
+
+      logger.i(
+        'Avvio autorizzazione per veicolo: $vehicleId presso $qrCodeUrl',
+      );
+
       final response = await http.post(
-        url,
+        Uri.parse(qrCodeUrl),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'vehicle_id': vehicleId,
-          'node_id': stationId,
-        }),
+        body: jsonEncode({'vehicle_id': vehicleId}),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        logger.i('Vehicle associated to station successfully: ${response.body}');
+        logger.i(
+          'Vehicle associated to station successfully: ${response.body}',
+        );
+        return true;
       } else {
         logger.w('Failed to associate vehicle: ${response.body}');
-        throw Exception("Errore durante l'associazione: ${response.body}");
+        return false;
       }
     } catch (e) {
       logger.e('Connection error during association: $e');
-      throw Exception("Impossibile connettersi al server: $e");
+      rethrow;
     }
   }
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../core/logger/app_logger.dart';
 import '../services/vehicle.dart';
 
@@ -17,6 +15,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   final ApiService apiService = ApiService();
   bool isProcessing = false;
 
+  // Service
+  final ApiService _vehicleService = ApiService();
+
   @override
   void initState() {
     super.initState();
@@ -30,85 +31,50 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     super.dispose();
   }
 
-  Future<void> sendVehicleData(String qrCodeUrl) async {
-    if (isProcessing) return;
-
-    setState(() {
-      isProcessing = true;
-    });
+  Future<void> _processChargingAuthorization(String qrCodeUrl) async {
+    setState(() => isProcessing = true);
 
     try {
-      // Recupera l'ID del veicolo salvato
-      final vehicleId = await apiService.getSavedVehicleId();
-      
-      if (vehicleId == null) {
-        throw Exception('Nessun veicolo registrato. Registra prima il tuo veicolo.');
-      }
-
-      // Recupera i dati completi del veicolo
-      logger.i('Recupero dati del veicolo: $vehicleId');
-      final vehicleData = await apiService.getVehicleDetails(vehicleId);
-
-      // Invia i dati del veicolo all'URL del QR code
-      logger.i('Invio dati veicolo a: $qrCodeUrl');
-      
-      final response = await http.post(
-        Uri.parse(qrCodeUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(vehicleData),
+      final success = await _vehicleService.associateVehicleToStation(
+        qrCodeUrl,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        logger.i('Connessione alla stazione riuscita: ${response.body}');
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Connessione alla stazione riuscita!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
-
-          // Torna indietro dopo il successo
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) Navigator.pop(context, true);
-          });
-        }
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Connessione riuscita!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Future.delayed(
+          const Duration(seconds: 2),
+          () {
+            if(mounted) {Navigator.pop(context, true);}
+          },
+        );
       } else {
-        logger.w('Errore nella connessione: ${response.body}');
-        throw Exception('Errore nella connessione: ${response.body}');
+        throw Exception('Errore durante l\'autorizzazione');
       }
     } catch (e) {
-      logger.e('Errore: $e');
-      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Errore: ${e.toString()}'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
           ),
         );
       }
     } finally {
-      setState(() {
-        isProcessing = false;
-      });
+      if (mounted) setState(() => isProcessing = false);
     }
   }
 
   void _handleBarcode(BarcodeCapture capture) {
-    final List<Barcode> barcodes = capture.barcodes;
-    
-    for (final barcode in barcodes) {
-      final String? code = barcode.rawValue;
-      
-      if (code != null && !isProcessing) {
-        logger.i('QR Code rilevato: $code');
-        sendVehicleData(code);
-        break;
-      }
+    final String? code = capture.barcodes.firstOrNull?.rawValue;
+
+    if (code != null && !isProcessing) {
+      logger.i('QR Code rilevato: $code');
+      _processChargingAuthorization(code); // Chiama la nuova funzione UI
     }
   }
 
@@ -130,10 +96,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       ),
       body: Stack(
         children: [
-          MobileScanner(
-            controller: controller,
-            onDetect: _handleBarcode,
-          ),
+          MobileScanner(controller: controller, onDetect: _handleBarcode),
           if (isProcessing)
             Container(
               color: Colors.black54,
@@ -165,18 +128,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               child: const Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.qr_code_scanner,
-                    color: Colors.white,
-                    size: 48,
-                  ),
+                  Icon(Icons.qr_code_scanner, color: Colors.white, size: 48),
                   SizedBox(height: 8),
                   Text(
                     'Posiziona il codice QR entro la cornice',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
                 ],
