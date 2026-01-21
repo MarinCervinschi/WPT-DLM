@@ -16,6 +16,7 @@ dependencies = [
     "smbus2>=0.6.0",
     "sqlalchemy>=2.0.44",
     "uvicorn>=0.38.0",
+    "websockets>=16.0",
 ]
 
 [dependency-groups]
