@@ -20,7 +20,7 @@ class ChargingMapPage extends StatefulWidget {
 
 class _ChargingMapPageState extends State<ChargingMapPage> {
   // Controllers
-  late GoogleMapController? _mapController;
+  GoogleMapController? _mapController;
 
   // State variables
   Position? _currentPosition;

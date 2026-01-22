@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../core/logger/app_logger.dart';
 import '../services/vehicle.dart';
+import '../widgets/main_wrapper.dart';
 
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
@@ -33,6 +34,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   Future<void> _processChargingAuthorization(String qrCodeUrl) async {
     setState(() => isProcessing = true);
+    // Ferma lo scanner per evitare scansioni multiple
+    controller.stop();
 
     try {
       final success = await _vehicleService.associateVehicleToStation(
@@ -49,7 +52,12 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         Future.delayed(
           const Duration(seconds: 2),
           () {
-            if(mounted) {Navigator.pop(context, true);}
+            if(mounted) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const MainWrapper()),
+                (route) => false,
+              );
+            }
           },
         );
       } else {
@@ -63,6 +71,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             backgroundColor: Colors.red,
           ),
         );
+        // Riavvia lo scanner in caso di errore per permettere una nuova scansione
+        controller.start();
       }
     } finally {
       if (mounted) setState(() => isProcessing = false);
