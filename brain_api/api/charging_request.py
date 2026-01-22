@@ -7,7 +7,7 @@ router = APIRouter()
 
 
 @router.post(
-    "/stations/{node_id}/charge",
+    "/nodes/{node_id}/charge",
     response_model=ChargingRequestResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Request charging session",
@@ -21,9 +21,9 @@ async def request_charging(
     mqtt_service=Depends(get_mqtt_service),
 ):
     """
-    Request a charging session for a vehicle at a specific station.
+    Request a charging session for a vehicle at a specific node.
     
-    The QR code scan provides the station ID, and the app provides the vehicle ID.
+    The QR code scan provides the node ID, and the app provides the vehicle ID.
     This publishes a message to the MQTT topic for the hub to process.
     """
     service = ChargingRequestService(db, mqtt_service)
