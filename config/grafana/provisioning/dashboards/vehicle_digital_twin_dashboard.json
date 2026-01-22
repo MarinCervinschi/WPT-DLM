@@ -759,7 +759,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"geo_location_lat\" or r[\"_field\"] == \"geo_location_lon\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> keep(columns: [\"_time\", \"geo_location_lat\", \"geo_location_lon\"])\n  |> rename(columns: {geo_location_lat: \"latitude\", geo_location_lon: \"longitude\"})",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"geo_location_latitude\" or r[\"_field\"] == \"geo_location_longitude\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> keep(columns: [\"_time\", \"geo_location_latitude\", \"geo_location_longitude\"])\n  |> rename(columns: {geo_location_latitude: \"latitude\", geo_location_longitude: \"longitude\"})",
           "refId": "A"
         }
       ],
@@ -817,7 +817,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"geo_location_lat\" or r[\"_field\"] == \"geo_location_lon\" or r[\"_field\"] == \"geo_location_alt\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({r with \n    latitude: r.geo_location_lat,\n    longitude: r.geo_location_lon,\n    altitude: r.geo_location_alt\n  }))\n  |> keep(columns: [\"latitude\", \"longitude\", \"altitude\"])",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"geo_location_latitude\" or r[\"_field\"] == \"geo_location_longitude\" or r[\"_field\"] == \"geo_location_altitude\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({r with \n    latitude: r.geo_location_latitude,\n    longitude: r.geo_location_longitude,\n    altitude: r.geo_location_altitude\n  }))\n  |> keep(columns: [\"latitude\", \"longitude\", \"altitude\"])",
           "refId": "A"
         }
       ],
@@ -1021,7 +1021,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 100)\n  |> keep(columns: [\"_time\", \"battery_level\", \"speed_kmh\", \"engine_temp_c\", \"is_charging\", \"geo_location_lat\", \"geo_location_lon\", \"geo_location_alt\"])\n  |> rename(columns: {_time: \"Timestamp\", battery_level: \"Battery (%)\", speed_kmh: \"Speed (km/h)\", engine_temp_c: \"Engine Temp (°C)\", is_charging: \"Charging\", geo_location_lat: \"Latitude\", geo_location_lon: \"Longitude\", geo_location_alt: \"Altitude (m)\"})",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 100)\n  |> keep(columns: [\"_time\", \"battery_level\", \"speed_kmh\", \"engine_temp_c\", \"is_charging\", \"geo_location_latitude\", \"geo_location_longitude\", \"geo_location_altitude\"])\n  |> rename(columns: {_time: \"Timestamp\", battery_level: \"Battery (%)\", speed_kmh: \"Speed (km/h)\", engine_temp_c: \"Engine Temp (°C)\", is_charging: \"Charging\", geo_location_latitude: \"Latitude\", geo_location_longitude: \"Longitude\", geo_location_altitude: \"Altitude (m)\"})",
           "refId": "A"
         }
       ],
