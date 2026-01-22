@@ -56,7 +56,7 @@ def main():
         print("=" * 60 + "\n")
 
         telemetry_data = VehicleTelemetry(
-            geo_location=GeoLocation(lat=44.6469, lon=10.9252, alt=50.0),
+            geo_location=GeoLocation(latitude=44.6469, longitude=10.9252, altitude=50.0),
             battery_level=50,
             is_charging=False,
             speed_kmh=0,
@@ -66,7 +66,7 @@ def main():
         time.sleep(2)
 
         telemetry_data = VehicleTelemetry(
-            geo_location=GeoLocation(lat=44.6470, lon=10.9255, alt=50.0),
+            geo_location=GeoLocation(latitude=44.6470, longitude=10.9255, altitude=50.0),
             battery_level=15,
             is_charging=False,
             speed_kmh=54,
@@ -89,7 +89,7 @@ def main():
             },
         )
         telemetry_data = VehicleTelemetry(
-            geo_location=GeoLocation(lat=44.6475, lon=10.9260, alt=50.0),
+            geo_location=GeoLocation(latitude=44.6475, longitude=10.9260, altitude=50.0),
             battery_level=10,
             is_charging=True,
             speed_kmh=0,
@@ -127,7 +127,7 @@ def main():
         time.sleep(10)
 
         telemetry_data = VehicleTelemetry(
-            geo_location=GeoLocation(lat=44.6497, lon=10.9246, alt=50.0),
+            geo_location=GeoLocation(latitude=44.6497, longitude=10.9246, altitude=50.0),
             battery_level=80,
             is_charging=False,
             speed_kmh=15,
