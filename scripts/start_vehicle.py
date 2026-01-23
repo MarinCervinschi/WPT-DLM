@@ -55,6 +55,7 @@ def main():
         print("🏁 Vehicle simulator started - sending vehicle requests")
         print("=" * 60 + "\n")
 
+        # Initial telemetry
         telemetry_data = VehicleTelemetry(
             geo_location=GeoLocation(latitude=44.6469, longitude=10.9252, altitude=50.0),
             battery_level=50,
@@ -62,84 +63,101 @@ def main():
             speed_kmh=0,
             engine_temp_c=25.0,
         )
-        simulate_vehicle_telemetry(mqtt_service, "vehicle_002", telemetry_data)
-        time.sleep(2)
+        simulate_vehicle_telemetry(mqtt_service, "vehicle_001", telemetry_data)
+        time.sleep(1)
 
+        # Simulate multiple vehicles over time
+        vehicles = [
+            {"id": "vehicle_001", "node": "node_01", "soc": 20},
+            {"id": "vehicle_002", "node": "node_02", "soc": 40},
+            {"id": "vehicle_003", "node": "node_03", "soc": 10},
+            {"id": "vehicle_004", "node": "node_01", "soc": 5},
+        ]
+
+        for vehicle in vehicles:
+            print(f"\n🚗 {vehicle['id']} arrives at {vehicle['node']} (SoC: {vehicle['soc']}%)")
+            simulate_cloud_request(
+                mqtt_service,
+                "hub_01",
+                {
+                    "vehicle_id": vehicle["id"],
+                    "node_id": vehicle["node"],
+                    "soc_percent": vehicle["soc"],
+                },
+            )
+            # Send telemetry while charging
+            telemetry_data = VehicleTelemetry(
+                geo_location=GeoLocation(latitude=44.6470 + 0.001 * int(vehicle["id"].split("_")[1]), longitude=10.9255, altitude=50.0),
+                battery_level=vehicle["soc"],
+                is_charging=True,
+                speed_kmh=0,
+                engine_temp_c=30.0,
+            )
+            simulate_vehicle_telemetry(mqtt_service, vehicle["id"], telemetry_data)
+            time.sleep(2)
+
+        print("\n⚡ DLM balancing power across vehicles...")
+        time.sleep(10)
+
+        # Simulate some vehicles leaving or updating
+        print("\n🚗 Vehicle 001 finished charging and leaves")
+        # Simulate leaving by sending telemetry with is_charging=False
         telemetry_data = VehicleTelemetry(
             geo_location=GeoLocation(latitude=44.6470, longitude=10.9255, altitude=50.0),
-            battery_level=15,
-            is_charging=False,
-            speed_kmh=54,
-            engine_temp_c=30.0,
-        )
-        simulate_vehicle_telemetry(mqtt_service, "vehicle_002", telemetry_data)
-
-        print("\n" + "=" * 60)
-        print("🏁 Vehicle simulator started - sending vehicle requests")
-        print("=" * 60 + "\n")
-
-        print("\n🚗 Vehicle 1 arrives at node_01")
-        simulate_cloud_request(
-            mqtt_service,
-            "hub_01",
-            {
-                "vehicle_id": "vehicle_002",
-                "node_id": "node_01",
-                "soc_percent": 10,
-            },
-        )
-        telemetry_data = VehicleTelemetry(
-            geo_location=GeoLocation(latitude=44.6475, longitude=10.9260, altitude=50.0),
-            battery_level=10,
-            is_charging=True,
-            speed_kmh=0,
-            engine_temp_c=32.0,
-        )
-        simulate_vehicle_telemetry(mqtt_service, "vehicle_002", telemetry_data)
-        time.sleep(7)
-
-        # Vehicle 2 arrives (high priority, medium SoC)
-        print("\n🚗 Vehicle 2 arrives at node_02 (HIGH PRIORITY)")
-        simulate_cloud_request(
-            mqtt_service,
-            "hub_01",
-            {
-                "vehicle_id": "vehicle_002",
-                "node_id": "node_02",
-                "soc_percent": 40,
-            },
-        )
-        print("⚡ DLM will reallocate power based on priority...")
-        time.sleep(7)
-
-        # Vehicle 3 arrives (medium priority, very low SoC - emergency)
-        print("\n🚗 Vehicle 3 arrives at node_03 (EMERGENCY - 5% SoC)")
-        simulate_cloud_request(
-            mqtt_service,
-            "hub_01",
-            {
-                "vehicle_id": "vehicle_003",
-                "node_id": "node_03",
-                "soc_percent": 5,  # Very low!
-            },
-        )
-        print("⚡ DLM will prioritize the low SoC vehicle...")
-        time.sleep(10)
-
-        telemetry_data = VehicleTelemetry(
-            geo_location=GeoLocation(latitude=44.6497, longitude=10.9246, altitude=50.0),
             battery_level=80,
             is_charging=False,
-            speed_kmh=15,
-            engine_temp_c=30.0,
+            speed_kmh=20,
+            engine_temp_c=28.0,
         )
-        simulate_vehicle_telemetry(mqtt_service, "vehicle_002", telemetry_data)
+        simulate_vehicle_telemetry(mqtt_service, "vehicle_001", telemetry_data)
+        time.sleep(2)
 
-        print("\n" + "=" * 60)
-        print("📊 DLM continues to rebalance power every 5 seconds")
-        print("=" * 60 + "\n")
+        # Add more vehicles
+        new_vehicles = [
+            {"id": "vehicle_005", "node": "node_02", "soc": 30},
+            {"id": "vehicle_006", "node": "node_03", "soc": 15},
+        ]
+        for vehicle in new_vehicles:
+            print(f"\n🚗 {vehicle['id']} arrives at {vehicle['node']} (SoC: {vehicle['soc']}%)")
+            simulate_cloud_request(
+                mqtt_service,
+                "hub_01",
+                {
+                    "vehicle_id": vehicle["id"],
+                    "node_id": vehicle["node"],
+                    "soc_percent": vehicle["soc"],
+                },
+            )
+            telemetry_data = VehicleTelemetry(
+                geo_location=GeoLocation(latitude=44.6470, longitude=10.9255, altitude=50.0),
+                battery_level=vehicle["soc"],
+                is_charging=True,
+                speed_kmh=0,
+                engine_temp_c=32.0,
+            )
+            simulate_vehicle_telemetry(mqtt_service, vehicle["id"], telemetry_data)
+            time.sleep(1)
 
-        time.sleep(10)
+        print("\n⚡ DLM rebalancing with new arrivals...")
+        time.sleep(15)
+
+        # Simulate periodic telemetry updates
+        for i in range(5):
+            for vehicle in vehicles + new_vehicles:
+                if vehicle["id"] != "vehicle_001":  # Skip the one that left
+                    soc = min(100, vehicle["soc"] + (i+1) * 10)  # Simulate charging
+                    telemetry_data = VehicleTelemetry(
+                        geo_location=GeoLocation(latitude=44.6470, longitude=10.9255, altitude=50.0),
+                        battery_level=soc,
+                        is_charging=True,
+                        speed_kmh=0,
+                        engine_temp_c=30.0 + i,
+                    )
+                    simulate_vehicle_telemetry(mqtt_service, vehicle["id"], telemetry_data)
+            time.sleep(5)
+
+        print("\n📊 Simulation complete - data should be in DB")
+        time.sleep(5)
     except Exception as e:
         logger.error(f"An error occurred in the vehicle simulator: {e}")
     finally:
