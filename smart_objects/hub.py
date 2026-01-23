@@ -1,3 +1,4 @@
+import random
 from typing import Dict, Optional
 
 from shared.mqtt_dtos import (
@@ -111,6 +112,8 @@ class Hub(SmartObject):
 
     def publish_hub_status(self) -> None:
         """Publish hub status message."""
+
+        self.cpu_temp = random.uniform(40.0, 85.0)
 
         status = HubStatus(
             state=self.current_state,
