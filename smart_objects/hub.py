@@ -200,11 +200,15 @@ class Hub(SmartObject):
         """
         node = self.get_node(request.node_id)
         if node:
-            # Update node with vehicle information
             node.connected_vehicle_id = request.vehicle_id
             node.current_vehicle_soc = request.soc_percent
 
-            # Start charging (this will change state and publish status)
+            node.measure_sensors()
+            if node.is_occupied is False:
+                raise ValueError(
+                    f"Node {request.node_id} has no vehicle connected for assignment"
+                )
+
             node.set_state(ChargingState.CHARGING)
 
             self.logger.info(

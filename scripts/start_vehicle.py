@@ -56,23 +56,23 @@ def main():
         print("=" * 60 + "\n")
 
         telemetry_data = VehicleTelemetry(
-            geo_location=GeoLocation(lat=44.6469, lon=10.9252, alt=50.0),
+            geo_location=GeoLocation(latitude=44.6469, longitude=10.9252, altitude=50.0),
             battery_level=50,
             is_charging=False,
             speed_kmh=0,
             engine_temp_c=25.0,
         )
-        simulate_vehicle_telemetry(mqtt_service, "vehicle_001", telemetry_data)
+        simulate_vehicle_telemetry(mqtt_service, "vehicle_002", telemetry_data)
         time.sleep(2)
 
         telemetry_data = VehicleTelemetry(
-            geo_location=GeoLocation(lat=44.6470, lon=10.9255, alt=50.0),
+            geo_location=GeoLocation(latitude=44.6470, longitude=10.9255, altitude=50.0),
             battery_level=15,
             is_charging=False,
             speed_kmh=54,
             engine_temp_c=30.0,
         )
-        simulate_vehicle_telemetry(mqtt_service, "vehicle_001", telemetry_data)
+        simulate_vehicle_telemetry(mqtt_service, "vehicle_002", telemetry_data)
 
         print("\n" + "=" * 60)
         print("🏁 Vehicle simulator started - sending vehicle requests")
@@ -83,19 +83,19 @@ def main():
             mqtt_service,
             "hub_01",
             {
-                "vehicle_id": "vehicle_001",
+                "vehicle_id": "vehicle_002",
                 "node_id": "node_01",
                 "soc_percent": 10,
             },
         )
         telemetry_data = VehicleTelemetry(
-            geo_location=GeoLocation(lat=44.6475, lon=10.9260, alt=50.0),
+            geo_location=GeoLocation(latitude=44.6475, longitude=10.9260, altitude=50.0),
             battery_level=10,
             is_charging=True,
             speed_kmh=0,
             engine_temp_c=32.0,
         )
-        simulate_vehicle_telemetry(mqtt_service, "vehicle_001", telemetry_data)
+        simulate_vehicle_telemetry(mqtt_service, "vehicle_002", telemetry_data)
         time.sleep(7)
 
         # Vehicle 2 arrives (high priority, medium SoC)
@@ -125,6 +125,15 @@ def main():
         )
         print("⚡ DLM will prioritize the low SoC vehicle...")
         time.sleep(10)
+
+        telemetry_data = VehicleTelemetry(
+            geo_location=GeoLocation(latitude=44.6497, longitude=10.9246, altitude=50.0),
+            battery_level=80,
+            is_charging=False,
+            speed_kmh=15,
+            engine_temp_c=30.0,
+        )
+        simulate_vehicle_telemetry(mqtt_service, "vehicle_002", telemetry_data)
 
         print("\n" + "=" * 60)
         print("📊 DLM continues to rebalance power every 5 seconds")
