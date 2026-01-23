@@ -13,7 +13,9 @@ from .api import dependencies
 from .core.config import settings
 from .core.logging import setup_logging
 from .core.websocket_manager import ws_manager
+from .data_collector import MQTTDataCollector
 from .db import init_db
+from .db.session import SessionLocal
 from .schemas import ErrorResponse
 from shared.services import MQTTService
 from shared.mqtt_dtos import VehicleTelemetry
@@ -72,8 +74,27 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Failed to initialize database: {e}")
 
+    # Initialize and start MQTT Data Collector
+    db = SessionLocal()
+    try:
+        data_collector = MQTTDataCollector(mqtt_service, db)
+        data_collector.subscribe()
+        logger.info("MQTT Data Collector initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize MQTT Data Collector: {e}")
+        db.close()
+        raise
+
     yield
 
+    # Stop data collector
+    try:
+        data_collector.unsubscribe()
+    except Exception as e:
+        logger.error(f"Error stopping data collector: {e}")
+    finally:
+        db.close()
+    
     mqtt_service.disconnect()
     logger.info(f"Shutting down {settings.PROJECT_NAME}")
 
