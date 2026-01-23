@@ -34,7 +34,7 @@ def main():
         hub = Hub(
             hub_id="hub_01",
             mqtt_service=mqtt_service,
-            location=GeoLocation(lat=44.6469, lon=10.9252, alt=50.0),
+            location=GeoLocation(latitude=44.6469, longitude=10.9252, altitude=50.0),
             max_grid_capacity_kw=60.0,  # Limited grid capacity
             firmware_version="1.0.0",
             dlm_interval=5.0,  # Apply policy every 5 seconds

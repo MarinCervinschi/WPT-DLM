@@ -129,7 +129,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": ""
+          "fields": "_value"
         },
         "showThresholdLabels": false,
         "showThresholdMarkers": true,
@@ -142,12 +142,12 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_status\")\n  |> filter(fn: (r) => r[\"node_id\"] == \"${node_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\")\n  |> last()",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_status\")\n  |> filter(fn: (r) => r[\"node_id\"] == \"${node_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\")\n  |> keep(columns: [\"_value\"])\n  |> last()",
           "refId": "A"
         }
       ],
       "title": "Charging State",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": {
@@ -289,7 +289,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": ""
+          "fields": "_value"
         },
         "textMode": "value"
       },
@@ -300,7 +300,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> filter(fn: (r) => r[\"node_id\"] == \"${node_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_occupied\")\n  |> last()",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> filter(fn: (r) => r[\"node_id\"] == \"${node_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_occupied\")\n  |> keep(columns: [\"_value\"])\n  |> last()",
           "refId": "A"
         }
       ],
@@ -363,7 +363,7 @@
           "refId": "A"
         }
       ],
-      "title": "Node Static Info",
+      "title": "Max Power Capacity",
       "type": "stat"
     },
     {
@@ -808,7 +808,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": ""
+          "fields": "_value"
         },
         "textMode": "auto"
       },
@@ -819,7 +819,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> filter(fn: (r) => r[\"node_id\"] == \"${node_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"connected_vehicle_id\")\n  |> last()\n  |> map(fn: (r) => ({ r with _value: if exists r._value then r._value else \"None\" }))",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> filter(fn: (r) => r[\"node_id\"] == \"${node_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"connected_vehicle_id\")\n  |> keep(columns: [\"_value\"])\n  |> last()\n  |> map(fn: (r) => ({ r with _value: if exists r._value then r._value else \"None\" }))",
           "refId": "A"
         }
       ],
@@ -1090,12 +1090,45 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "telemetry = from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> filter(fn: (r) => r[\"node_id\"] == \"${node_id}\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n\nstatus = from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_status\")\n  |> filter(fn: (r) => r[\"node_id\"] == \"${node_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n\njoin(\n  tables: {t: telemetry, s: status},\n  on: [\"_time\"]\n)\n|> sort(columns: [\"_time\"], desc: true)\n|> limit(n: 100)\n|> keep(columns: [\"_time\", \"state\", \"voltage\", \"current\", \"power_kw\", \"power_limit_kw\", \"is_occupied\", \"connected_vehicle_id\", \"current_vehicle_soc\"])\n|> rename(columns: {_time: \"Timestamp\", state: \"State\", voltage: \"Voltage (V)\", current: \"Current (A)\", power_kw: \"Power (kW)\", power_limit_kw: \"Limit (kW)\", is_occupied: \"Occupied\", connected_vehicle_id: \"Vehicle ID\", current_vehicle_soc: \"SOC (%)\"})",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> filter(fn: (r) => r[\"node_id\"] == \"${node_id}\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 100)\n  |> keep(columns: [\"_time\", \"voltage\", \"current\", \"power_kw\", \"power_limit_kw\", \"is_occupied\", \"connected_vehicle_id\", \"current_vehicle_soc\"])\n  |> rename(columns: {_time: \"Timestamp\", voltage: \"Voltage (V)\", current: \"Current (A)\", power_kw: \"Power (kW)\", power_limit_kw: \"Limit (kW)\", is_occupied: \"Occupied\", connected_vehicle_id: \"Vehicle ID\", current_vehicle_soc: \"SOC (%)\"})",
           "refId": "A"
         }
       ],
-      "title": "Telemetry History",
-      "type": "table"
+      "title": "Telemetry History"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "targets": [
+        {
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_status\")\n  |> filter(fn: (r) => r[\"node_id\"] == \"${node_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 100)\n  |> keep(columns: [\"_time\", \"state\"])\n  |> rename(columns: {_time: \"Timestamp\", state: \"State\"})",
+          "refId": "A"
+        }
+      ],
+      "title": "State History",
+      "type": "table",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Timestamp"
+          }
+        ]
+      }
     }
   ],
   "refresh": "5s",

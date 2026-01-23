@@ -22,6 +22,8 @@ class ChargingState(str, Enum):
 
 
 class GeoLocation(BaseModel):
-    lat: float = Field(..., ge=-90, le=90, description="Latitude")
-    lon: float = Field(..., ge=-180, le=180, description="Longitude")
-    alt: float = Field(default=0.0, ge=-500, le=10000, description="Altitude in meters")
+    latitude: float = Field(..., ge=-90, le=90, description="Latitude")
+    longitude: float = Field(..., ge=-180, le=180, description="Longitude")
+    altitude: float = Field(
+        default=0.0, ge=-500, le=10000, description="Altitude in meters"
+    )

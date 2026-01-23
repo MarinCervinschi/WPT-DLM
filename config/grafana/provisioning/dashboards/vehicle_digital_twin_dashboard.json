@@ -121,7 +121,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": ""
+          "fields": "_value"
         },
         "textMode": "value"
       },
@@ -132,7 +132,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_charging\")\n  |> last()",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_charging\")\n  |> keep(columns: [\"_value\"])\n  |> last()",
           "refId": "A"
         }
       ],
@@ -225,6 +225,8 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "min": 0,
+          "max": 150,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -233,15 +235,31 @@
                 "value": null
               },
               {
+                "color": "light-green",
+                "value": 30
+              },
+              {
                 "color": "yellow",
-                "value": 60
+                "value": 50
               },
               {
                 "color": "orange",
-                "value": 100
+                "value": 70
               },
               {
                 "color": "red",
+                "value": 90
+              },
+              {
+                "color": "dark-red",
+                "value": 110
+              },
+              {
+                "color": "purple",
+                "value": 130
+              },
+              {
+                "color": "black",
                 "value": 150
               }
             ]
@@ -283,7 +301,7 @@
         }
       ],
       "title": "Current Speed",
-      "type": "stat"
+      "type": "gauge"
     },
     {
       "datasource": {
@@ -672,9 +690,8 @@
       "id": 9,
       "options": {
         "basemap": {
-          "config": {},
-          "name": "Layer 0",
-          "type": "default"
+          "type": "osm-standard",
+          "name": "OpenStreetMap"
         },
         "controls": {
           "mouseWheelZoom": true,
@@ -729,11 +746,10 @@
           "mode": "details"
         },
         "view": {
-          "allLayers": true,
-          "id": "zero",
-          "lat": 0,
-          "lon": 0,
-          "zoom": 1
+          "id": "coords",
+          "lat": 44.65,
+          "lon": 10.92,
+          "zoom": 13
         }
       },
       "pluginVersion": "10.0.0",
@@ -743,7 +759,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"geo_location_lat\" or r[\"_field\"] == \"geo_location_lon\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> keep(columns: [\"_time\", \"geo_location_lat\", \"geo_location_lon\"])\n  |> rename(columns: {geo_location_lat: \"latitude\", geo_location_lon: \"longitude\"})",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"geo_location_latitude\" or r[\"_field\"] == \"geo_location_longitude\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> keep(columns: [\"_time\", \"geo_location_latitude\", \"geo_location_longitude\"])\n  |> rename(columns: {geo_location_latitude: \"latitude\", geo_location_longitude: \"longitude\"})",
           "refId": "A"
         }
       ],
@@ -784,7 +800,7 @@
         "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
-        "orientation": "horizontal",
+        "orientation": "vertical",
         "reduceOptions": {
           "values": false,
           "calcs": [
@@ -801,7 +817,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"geo_location_lat\" or r[\"_field\"] == \"geo_location_lon\" or r[\"_field\"] == \"geo_location_alt\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({r with \n    latitude: r.geo_location_lat,\n    longitude: r.geo_location_lon,\n    altitude: r.geo_location_alt\n  }))\n  |> keep(columns: [\"latitude\", \"longitude\", \"altitude\"])",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"geo_location_latitude\" or r[\"_field\"] == \"geo_location_longitude\" or r[\"_field\"] == \"geo_location_altitude\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({r with \n    latitude: r.geo_location_latitude,\n    longitude: r.geo_location_longitude,\n    altitude: r.geo_location_altitude\n  }))\n  |> keep(columns: [\"latitude\", \"longitude\", \"altitude\"])",
           "refId": "A"
         }
       ],
@@ -901,7 +917,7 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_charging\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_charging\")\n  |> map(fn: (r) => ({ r with _value: if bool(v: r._value) then 1 else 0 }))\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)",
           "refId": "A"
         }
       ],
@@ -1005,80 +1021,11 @@
             "type": "influxdb",
             "uid": "influxdb"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 100)\n  |> keep(columns: [\"_time\", \"battery_level\", \"speed_kmh\", \"engine_temp_c\", \"is_charging\", \"geo_location_lat\", \"geo_location_lon\", \"geo_location_alt\"])\n  |> rename(columns: {_time: \"Timestamp\", battery_level: \"Battery (%)\", speed_kmh: \"Speed (km/h)\", engine_temp_c: \"Engine Temp (°C)\", is_charging: \"Charging\", geo_location_lat: \"Latitude\", geo_location_lon: \"Longitude\", geo_location_alt: \"Altitude (m)\"})",
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 100)\n  |> keep(columns: [\"_time\", \"battery_level\", \"speed_kmh\", \"engine_temp_c\", \"is_charging\", \"geo_location_latitude\", \"geo_location_longitude\", \"geo_location_altitude\"])\n  |> rename(columns: {_time: \"Timestamp\", battery_level: \"Battery (%)\", speed_kmh: \"Speed (km/h)\", engine_temp_c: \"Engine Temp (°C)\", is_charging: \"Charging\", geo_location_latitude: \"Latitude\", geo_location_longitude: \"Longitude\", geo_location_altitude: \"Altitude (m)\"})",
           "refId": "A"
         }
       ],
       "title": "Telemetry History",
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "influxdb"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 40
-      },
-      "id": 13,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Timestamp"
-          }
-        ]
-      },
-      "pluginVersion": "10.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "influxdb"
-          },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_request\")\n  |> filter(fn: (r) => r[\"vehicle_id\"] == \"${vehicle_id}\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 50)\n  |> keep(columns: [\"_time\", \"node_id\", \"soc_percent\", \"priority\"])\n  |> rename(columns: {_time: \"Request Time\", node_id: \"Target Node\", soc_percent: \"SOC at Request (%)\", priority: \"Priority\"})",
-          "refId": "A"
-        }
-      ],
-      "title": "Charging Request History",
       "type": "table"
     }
   ],

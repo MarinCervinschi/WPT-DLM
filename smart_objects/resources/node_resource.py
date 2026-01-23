@@ -1,5 +1,5 @@
 import threading
-from typing import Optional
+from typing import ClassVar, Optional
 
 
 from shared.mqtt_dtos.enums import ChargingState
@@ -24,7 +24,9 @@ class Node(SmartObjectResource):
     - L298N actuator: controls charging on/off and PWM level
     """
 
-    VEHICLE_DETECTION_THRESHOLD = 50.0  # Vehicle present if distance < 50cm
+    VEHICLE_DETECTION_THRESHOLD: ClassVar[int] = (
+        50  # Vehicle present if distance < 50cm
+    )
 
     def __init__(
         self,
@@ -70,7 +72,6 @@ class Node(SmartObjectResource):
 
             self.logger.info(f"🔄 State change: {old_state.value} → {new_state.value}")
 
-            # Control actuator based on state
             if new_state == ChargingState.CHARGING:
                 self._start_charging()
             elif new_state in (
@@ -80,7 +81,6 @@ class Node(SmartObjectResource):
             ):
                 self._stop_charging()
 
-            # Notify listeners (they will call get_status() and publish)
             self.notify_update(updated_value=self.get_status())
 
     def _start_charging(self) -> None:
