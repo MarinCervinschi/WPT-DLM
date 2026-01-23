@@ -4,8 +4,7 @@ import time
 from typing import List, Optional, ClassVar
 import gpxpy
 from .smart_object_resource import SmartObjectResource
-from shared.mqtt_dtos import GeoLocation
-from shared.mqtt_dtos.vehicle_dto import VehicleTelemetry
+from shared.mqtt_dtos import VehicleTelemetry, GeoLocation
 
 
 class VehicleEngineResource(SmartObjectResource):
@@ -118,21 +117,27 @@ class VehicleEngineResource(SmartObjectResource):
                 self.speed_kmh = random.uniform(0, 120)
                 self.engine_temp_c = random.uniform(20, 60)
 
-                telemetry = VehicleTelemetry(
-                    geo_location=self.current_location,
-                    battery_level=int(self.battery_level),
-                    speed_kmh=self.speed_kmh,
-                    engine_temp_c=self.engine_temp_c,
-                    is_charging=self.is_charging,
-                )
+                telemetry = self.get_telemetry()
 
                 self.logger.info(f"Vehicle Telemetry: {telemetry}")
-                self.notify_update(telemetry)
+                self.notify_update(message_type="telemetry")
 
             except Exception as e:
                 self.logger.error(f"Error in vehicle engine update: {e}")
 
             self._stop_update.wait(self.UPDATE_PERIOD)
+
+    def get_telemetry(self) -> VehicleTelemetry:
+        """Get telemetry message DTO (for periodic measurements)."""
+
+        assert self.current_location is not None, "Current location is not set"
+        return VehicleTelemetry(
+            geo_location=self.current_location,
+            battery_level=int(self.battery_level),
+            speed_kmh=self.speed_kmh,
+            engine_temp_c=self.engine_temp_c,
+            is_charging=self.is_charging,
+        )
 
     def _handle_direction_change(self, reverse: bool) -> None:
         """Handle reversing direction when reaching end of waypoints"""

@@ -30,7 +30,7 @@ class HC_SR04(Sensor):
 
     def measure(self) -> None:
         if self.simulation:
-            distance = random.uniform(2.0, 400.0)
+            distance = random.uniform(2.0, 60.0)
             self.simulate_measurement(distance)
         else:
             # TODO: Implement actual HC-SR04 hardware measurement logic here
