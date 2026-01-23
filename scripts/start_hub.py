@@ -12,11 +12,14 @@ from smart_objects.hub import Hub
 import logging
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.INFO,  # Set root to INFO to reduce noise
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger("dlm_priority_example")
+
+# Enable DEBUG for specific service
+logging.getLogger("DLMService-hub_01").setLevel(logging.DEBUG)
 
 
 def main():
