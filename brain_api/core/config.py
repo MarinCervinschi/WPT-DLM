@@ -38,6 +38,12 @@ class Settings(BaseSettings):
     MQTT_BROKER_HOST: str = "localhost"
     MQTT_BROKER_PORT: int = 1883
 
+    # InfluxDB
+    INFLUXDB_URL: str = "http://localhost:8086"
+    INFLUXDB_TOKEN: str = "change_me_in_production"
+    INFLUXDB_ORG: str = "wpt-dlm"
+    INFLUXDB_BUCKET: str = "telemetry"
+
     @computed_field
     @property
     def database_url(self) -> str:
