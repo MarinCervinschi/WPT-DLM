@@ -109,7 +109,7 @@ class DLMService:
 
                 self.logger.info(
                     f"📨 Received vehicle request: {request.vehicle_id} → "
-                    f"{request.node_id} (SoC: {request.soc_percent}%, Priority: {request.priority})"
+                    f"{request.node_id} (SoC: {request.soc_percent}%)"
                 )
 
                 if self._handle_vehicle_assignment_callback:

@@ -20,9 +20,6 @@ class VehicleRequest(BaseModel):
     soc_percent: int = Field(
         ..., ge=0, le=100, description="Current state of charge percentage"
     )
-    priority: int = Field(
-        default=0, ge=0, le=10, description="Charging priority (higher = more priority)"
-    )
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         description="Request timestamp",

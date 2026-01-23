@@ -210,7 +210,7 @@ class Hub(SmartObject):
 
             self.logger.info(
                 f"🔌 Vehicle {request.vehicle_id} assigned to node {request.node_id} "
-                f"(SoC: {request.soc_percent}%, Priority: {request.priority})"
+                f"(SoC: {request.soc_percent}%)"
             )
 
     def start(self) -> None:
