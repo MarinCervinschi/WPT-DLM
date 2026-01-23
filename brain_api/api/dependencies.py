@@ -15,6 +15,22 @@ from ..services import (
 DBSession = Annotated[Session, Depends(get_db)]
 
 
+_mqtt_service = None
+
+def get_mqtt_service():
+    """Dependency that provides MQTT service instance."""
+    global _mqtt_service
+    if _mqtt_service is None:
+        raise RuntimeError("MQTT service not initialized")
+    return _mqtt_service
+
+
+def set_mqtt_service(mqtt_service):
+    """Set the global MQTT service instance."""
+    global _mqtt_service
+    _mqtt_service = mqtt_service
+
+
 def get_hub_service(db: DBSession) -> HubService:
     """Dependency that provides HubService instance."""
     return HubService(db)

@@ -34,6 +34,16 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = 10
     DB_ECHO: bool = False  # SQL query logging
 
+    # MQTT Broker
+    MQTT_BROKER_HOST: str = "localhost"
+    MQTT_BROKER_PORT: int = 1883
+
+    # InfluxDB
+    INFLUXDB_URL: str = "http://localhost:8086"
+    INFLUXDB_TOKEN: str = "change_me_in_production"
+    INFLUXDB_ORG: str = "wpt-dlm"
+    INFLUXDB_BUCKET: str = "telemetry"
+
     @computed_field
     @property
     def database_url(self) -> str:

@@ -3,7 +3,9 @@ from typing import Sequence
 
 from sqlalchemy import and_, func, select
 
-from ..models import ChargingSession
+from brain_api.models.charging_session_dbo import ChargingSessionDbo
+
+from ..models import ChargingSessionDbo as ChargingSession
 from ..schemas import ChargingSessionCreate, ChargingSessionUpdate
 from .base import BaseRepository
 

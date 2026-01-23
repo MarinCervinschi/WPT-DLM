@@ -4,7 +4,7 @@ from typing import Any, Sequence
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from ..models import Vehicle
+from ..models import VehicleDbo as Vehicle
 from ..schemas import VehicleCreate, VehicleUpdate
 from .base import BaseRepository
 
