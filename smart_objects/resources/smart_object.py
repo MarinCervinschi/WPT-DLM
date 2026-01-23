@@ -1,17 +1,15 @@
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Literal
+from typing import Any, Dict
 
-from pydantic import BaseModel
+from shared.services import MQTTService
 
-from shared.services.mqtt_service import MQTTService
-from smart_objects.models import Actuator
-from smart_objects.resources.smart_object_resource import SmartObjectResource
-
-from .smart_object_resource import ResourceDataListener
-
-MessageType = Literal["info", "status", "telemetry"]
+from .smart_object_resource import (
+    MessageType,
+    SmartObjectResource,
+    ResourceDataListener,
+)
 
 
 class SmartObject(ABC):
@@ -75,14 +73,32 @@ class SmartObject(ABC):
         logger = self.logger
 
         class MessageListener(ResourceDataListener):
+
             def on_data_changed(
                 self,
                 resource: SmartObjectResource,
-                updated_value: BaseModel,
                 **kwargs: Any,
             ) -> None:
+                if kwargs.get("message_type") != message_type:
+                    return
+
                 try:
-                    payload = updated_value.model_dump_json()
+                    if message_type == "info":
+                        dto = resource.get_info()
+                    elif message_type == "status":
+                        dto = resource.get_status()
+                    elif message_type == "telemetry":
+                        dto = resource.get_telemetry()
+                    else:
+                        raise ValueError(f"Unknown message type: {message_type}")
+
+                    if dto is None:
+                        logger.warning(
+                            f"No data to publish for {message_type} of resource {resource.resource_id}"
+                        )
+                        return
+
+                    payload = dto.model_dump_json()
                     mqtt_service.publish(topic, payload, qos=qos, retain=retain)
 
                     logger.debug(

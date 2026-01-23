@@ -42,12 +42,10 @@ class Hub(SmartObject):
         self.max_grid_capacity_kw = max_grid_capacity_kw
         self.firmware_version = firmware_version
 
-        # Hub state
         self.current_state: ConnectionState = ConnectionState.OFFLINE
         self.ip_address: str = ip_address
         self.cpu_temp: float = 0.0
 
-        # DLM Service
         policy = dlm_policy or EqualSharingPolicy(
             max_grid_capacity_kw=max_grid_capacity_kw
         )
@@ -58,7 +56,6 @@ class Hub(SmartObject):
             dlm_interval=dlm_interval,
         )
 
-        # Set DLM callbacks
         self.dlm_service.set_get_nodes_state_callback(self._get_nodes_state)
         self.dlm_service.set_apply_allocation_callback(self._apply_allocation)
         self.dlm_service.set_handle_vehicle_assignment_callback(
@@ -218,28 +215,19 @@ class Hub(SmartObject):
 
     def start(self) -> None:
         """Start the hub and all its nodes."""
-        # Set hub to online
         self.set_hub_state(ConnectionState.ONLINE)
 
-        # Publish hub info
         self.publish_hub_info()
 
-        # Publish initial hub status
         self.publish_hub_status()
 
-        # Start all node resources and register their listeners
         super().start()
 
-        # Publish info for all nodes (once, retained)
-        for node_id, node_resource in self.resource_map.items():
+        for _, node_resource in self.resource_map.items():
             if isinstance(node_resource, Node):
-                # Manually trigger info publishing by notifying with message_type
-                info = node_resource.get_info()
-                node_resource.notify_update(updated_value=info, message_type="info")
-                state = node_resource.get_status()
-                node_resource.notify_update(updated_value=state, message_type="status")
+                node_resource.notify_update(message_type="info")
+                node_resource.notify_update(message_type="status")
 
-        # Start DLM service (subscribes to requests and starts periodic thread)
         self.dlm_service.start()
 
         self.logger.info(

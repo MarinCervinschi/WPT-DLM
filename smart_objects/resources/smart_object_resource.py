@@ -3,16 +3,17 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel
 
+MessageType = Literal["info", "status", "telemetry"]
+
 
 class ResourceDataListener(ABC):
+
     @abstractmethod
-    def on_data_changed(
-        self, resource: SmartObjectResource, updated_value: BaseModel, **kwargs: Any
-    ) -> None:
+    def on_data_changed(self, resource: SmartObjectResource, **kwargs: Any) -> None:
         pass
 
 
@@ -62,7 +63,7 @@ class SmartObjectResource(ABC):
         else:
             self.logger.debug(f"Listener not found: {resource_data_listener}")
 
-    def notify_update(self, updated_value: BaseModel, **kwargs) -> None:
+    def notify_update(self, message_type: MessageType) -> None:
         """Notify all registered listeners of a value change"""
         if not self.resource_listener_list:
             self.logger.info("No active listeners - nothing to notify")
@@ -70,7 +71,7 @@ class SmartObjectResource(ABC):
 
         for listener in self.resource_listener_list:
             if listener is not None:
-                listener.on_data_changed(self, updated_value, **kwargs)
+                listener.on_data_changed(self, message_type=message_type)
 
     def to_dict(self) -> dict:
         return {

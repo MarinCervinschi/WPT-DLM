@@ -2,11 +2,9 @@ import threading
 from typing import ClassVar, Optional
 
 
-from shared.mqtt_dtos.enums import ChargingState
-from shared.mqtt_dtos.node_dto import NodeInfo, NodeStatus, NodeTelemetry
-from smart_objects.actuators.l298n import L298NActuator
-from smart_objects.sensors.hc_sr04 import HC_SR04
-from smart_objects.sensors.ina_219 import INA219Sensor
+from shared.mqtt_dtos import NodeInfo, NodeStatus, NodeTelemetry, ChargingState
+from smart_objects.actuators import L298NActuator
+from smart_objects.sensors import INA219Sensor, HC_SR04
 
 from .smart_object_resource import SmartObjectResource
 
@@ -81,7 +79,7 @@ class Node(SmartObjectResource):
             ):
                 self._stop_charging()
 
-            self.notify_update(updated_value=self.get_status())
+            self.notify_update(message_type="status")
 
     def _start_charging(self) -> None:
         """Start charging by activating the actuator."""
@@ -182,9 +180,7 @@ class Node(SmartObjectResource):
             try:
                 self.measure_sensors()
 
-                self.notify_update(
-                    updated_value=self.get_telemetry(), message_type="telemetry"
-                )
+                self.notify_update(message_type="telemetry")
             except Exception as e:
                 self.logger.error(f"Error in telemetry loop: {e}")
 
