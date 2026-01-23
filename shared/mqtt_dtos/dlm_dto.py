@@ -4,26 +4,7 @@ from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 
 
-class VehicleRequest(BaseModel):
-    """
-    Vehicle charging request message.
-    Sent by Brain API to Hub via MQTT.
-    Topic: iot/hubs/+/requests
-    """
 
-    vehicle_id: str = Field(
-        ..., min_length=1, max_length=50, description="Vehicle identifier"
-    )
-    node_id: str = Field(
-        ..., min_length=1, max_length=50, description="Target node identifier"
-    )
-    soc_percent: int = Field(
-        ..., ge=0, le=100, description="Current state of charge percentage"
-    )
-    timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        description="Request timestamp",
-    )
 
 
 class DLMNotification(BaseModel):

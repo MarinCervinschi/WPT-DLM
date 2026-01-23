@@ -3,9 +3,9 @@ import logging
 import threading
 from typing import Callable, Dict, List, Optional
 
-from shared.mqtt_dtos.dlm_dto import DLMNotification, VehicleRequest
+from shared.mqtt_dtos import DLMNotification, VehicleRequest
 from shared.policies import IPolicy, PowerAllocation
-from shared.services.mqtt_service import MQTTService
+from shared.services import MQTTService
 
 
 class DLMService:

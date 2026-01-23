@@ -1,4 +1,4 @@
-from shared.mqtt_dtos.dlm_dto import VehicleRequest
+from shared.mqtt_dtos import VehicleRequest
 
 from .base_policy import IPolicy, PowerAllocation
 from .equal_sharing_policy import EqualSharingPolicy
