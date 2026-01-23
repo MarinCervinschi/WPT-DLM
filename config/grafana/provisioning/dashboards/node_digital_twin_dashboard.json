@@ -977,11 +977,29 @@
       "targets": [
         {
           "datasource": {
-            "type": "influxdb",
-            "uid": "influxdb"
+            "type": "postgres",
+            "uid": "postgresql"
           },
-          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"dlm_notification\")\n  |> filter(fn: (r) => r[\"affected_node_id\"] == \"${node_id}\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 50)\n  |> keep(columns: [\"_time\", \"trigger_reason\", \"original_limit\", \"new_limit\", \"total_grid_load\"])\n  |> rename(columns: {_time: \"Timestamp\", trigger_reason: \"Trigger Reason\", original_limit: \"Original Limit (kW)\", new_limit: \"New Limit (kW)\", total_grid_load: \"Total Grid Load (kW)\"})",
-          "refId": "A"
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT timestamp as \"Timestamp\", trigger_reason as \"Trigger Reason\", original_limit_kw as \"Original Limit (kW)\", new_limit_kw as \"New Limit (kW)\", total_grid_load_kw as \"Total Grid Load (kW)\" FROM dlm_events WHERE node_id = '${node_id}' ORDER BY timestamp DESC LIMIT 50;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "dlm_events",
+          "timeColumn": "timestamp",
+          "timeColumnType": "timestamp",
+          "where": []
         }
       ],
       "title": "DLM Events for This Node",
