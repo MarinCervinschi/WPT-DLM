@@ -1,10 +1,18 @@
 import random
 import threading
 import time
+import json
 from typing import List, Optional, ClassVar
 import gpxpy
 from .smart_object_resource import SmartObjectResource
-from shared.mqtt_dtos import VehicleTelemetry, GeoLocation
+from shared.mqtt_dtos import (
+    VehicleTelemetry,
+    GeoLocation,
+    NodeStatus,
+    NodeTelemetry,
+    ChargingState,
+)
+from shared.services import MQTTService
 
 
 class VehicleEngineResource(SmartObjectResource):
@@ -21,10 +29,22 @@ class VehicleEngineResource(SmartObjectResource):
     MIN_BATTERY_CONSUMPTION: ClassVar[float] = 0.05
     MAX_BATTERY_CONSUMPTION: ClassVar[float] = 0.0
 
-    def __init__(self, resource_id: str, gpx_file_name: str):
+    def __init__(
+        self,
+        resource_id: str,
+        gpx_file_name: str,
+        simulation: bool = True,
+        static_position: Optional[GeoLocation] = None,
+        mqtt_service: Optional[MQTTService] = None,
+        vehicle_id: Optional[str] = None,
+    ):
         super().__init__(resource_id)
 
         self.gpx_file_name = gpx_file_name
+        self.simulation = simulation
+        self.static_position = static_position
+        self.mqtt_service = mqtt_service
+        self.vehicle_id = vehicle_id
 
         self.way_point_list: List[GeoLocation] = []
         self.current_location: Optional[GeoLocation] = None
@@ -34,6 +54,7 @@ class VehicleEngineResource(SmartObjectResource):
         self.battery_level: float = self.MIN_BATTERY_LEVEL + random.random() * (
             self.MAX_BATTERY_LEVEL - self.MIN_BATTERY_LEVEL
         )
+        self.target_battery_level: Optional[float] = None
 
         self.speed_kmh: float = 0.0
         self.engine_temp_c: float = 25.0
@@ -41,6 +62,9 @@ class VehicleEngineResource(SmartObjectResource):
 
         self._update_thread: Optional[threading.Thread] = None
         self._stop_update = threading.Event()
+
+        self._assigned_hub_id: Optional[str] = None
+        self._assigned_node_id: Optional[str] = None
 
         self._load_gpx_waypoints()
 
@@ -87,25 +111,29 @@ class VehicleEngineResource(SmartObjectResource):
         time.sleep(self.TASK_DELAY_TIME)
         while not self._stop_update.is_set():
             try:
-                current_point = self.way_point_list[self._way_point_index]
-                self.current_location = GeoLocation(
-                    latitude=current_point.latitude,
-                    longitude=current_point.longitude,
-                    altitude=current_point.altitude or 0.0,
-                )
+                if not self.simulation:
+                    self.current_location = self.static_position
+                elif not self.is_charging:
+                    current_point = self.way_point_list[self._way_point_index]
+                    self.current_location = GeoLocation(
+                        latitude=current_point.latitude,
+                        longitude=current_point.longitude,
+                        altitude=current_point.altitude or 0.0,
+                    )
 
-                self._way_point_index += 1 if not self._reverse else -1
+                    self._way_point_index += 1 if not self._reverse else -1
 
-                if self._way_point_index >= len(self.way_point_list):
-                    self._handle_direction_change(reverse=True)
-                elif self._way_point_index < 0:
-                    self._handle_direction_change(reverse=False)
+                    if self._way_point_index >= len(self.way_point_list):
+                        self._handle_direction_change(reverse=True)
+                    elif self._way_point_index < 0:
+                        self._handle_direction_change(reverse=False)
 
-                consumption = random.uniform(
-                    self.MIN_BATTERY_CONSUMPTION,
-                    self.MAX_BATTERY_CONSUMPTION,
-                )
-                self.battery_level = max(0.0, self.battery_level - consumption)
+                if not self.is_charging:
+                    consumption = random.uniform(
+                        self.MIN_BATTERY_CONSUMPTION,
+                        self.MAX_BATTERY_CONSUMPTION,
+                    )
+                    self.battery_level = max(0.0, self.battery_level - consumption)
 
                 if self.battery_level <= 0.0:
                     self.logger.info("Vehicle battery depleted!")
@@ -114,8 +142,11 @@ class VehicleEngineResource(SmartObjectResource):
                     self.stop_periodic_event_update_task()
                     continue
 
-                self.speed_kmh = random.uniform(0, 120)
-                self.engine_temp_c = random.uniform(20, 60)
+                if self.is_charging:
+                    self.speed_kmh = 0.0
+                else:
+                    self.speed_kmh = random.uniform(0, 120)
+                    self.engine_temp_c = random.uniform(20, 60)
 
                 telemetry = self.get_telemetry()
 
@@ -153,3 +184,105 @@ class VehicleEngineResource(SmartObjectResource):
             self._stop_update.set()
             self._update_thread.join(timeout=5)
             self._update_thread = None
+
+    def handle_charging_request(self, hub_id: str, node_id: str) -> None:
+        """Handle charging request by subscribing to charging topics."""
+        self._assigned_hub_id = hub_id
+        self._assigned_node_id = node_id
+        self.logger.info(
+            f"Processing charging request for hub {hub_id}, node {node_id}"
+        )
+        self._subscribe_to_charging_topics(hub_id, node_id)
+
+    def _subscribe_to_charging_topics(self, hub_id: str, node_id: str) -> None:
+        """Subscribe to node status and telemetry topics."""
+        if not self.mqtt_service:
+            return
+
+        status_topic = f"iot/hubs/{hub_id}/nodes/{node_id}/status"
+        telemetry_topic = f"iot/hubs/{hub_id}/nodes/{node_id}/telemetry"
+
+        self.mqtt_service.subscribe(status_topic, self._on_node_status_message)
+        self.mqtt_service.subscribe(telemetry_topic, self._on_node_telemetry_message)
+
+        self.logger.info(f"Subscribed to {status_topic} and {telemetry_topic}")
+
+    def _unsubscribe_from_charging_topics(self) -> None:
+        """Unsubscribe from node topics after charging completes."""
+        if (
+            not self.mqtt_service
+            or not self._assigned_hub_id
+            or not self._assigned_node_id
+        ):
+            return
+
+        status_topic = (
+            f"iot/hubs/{self._assigned_hub_id}/nodes/{self._assigned_node_id}/status"
+        )
+        telemetry_topic = (
+            f"iot/hubs/{self._assigned_hub_id}/nodes/{self._assigned_node_id}/telemetry"
+        )
+
+        self.mqtt_service.unsubscribe(status_topic)
+        self.mqtt_service.unsubscribe(telemetry_topic)
+
+        self.logger.info(f"Unsubscribed from charging topics")
+
+        self._assigned_hub_id = None
+        self._assigned_node_id = None
+
+    def _on_node_status_message(self, msg) -> None:
+        """Handle node status messages."""
+        try:
+            data = json.loads(msg.payload.decode())
+            status = NodeStatus(**data)
+
+            if status.state == ChargingState.CHARGING and not self.is_charging:
+                self.is_charging = True
+                self.target_battery_level = random.uniform(80.0, 100.0)
+                self.logger.info(
+                    f"Charging started! Target: {self.target_battery_level:.1f}%"
+                )
+
+            elif (
+                status.state == ChargingState.FULL or status.state == ChargingState.IDLE
+            ):
+                if self.is_charging and self.battery_level >= (
+                    self.target_battery_level or 100
+                ):
+                    self.logger.info("Charging complete!")
+                    self._finish_charging()
+
+        except Exception as e:
+            self.logger.error(f"Error processing node status: {e}")
+
+    def _on_node_telemetry_message(self, msg) -> None:
+        """Handle node telemetry messages to update battery level."""
+        try:
+            data = json.loads(msg.payload.decode())
+            telemetry = NodeTelemetry(**data)
+
+            if self.is_charging and telemetry.power_kw > 0:
+                charge_rate_per_second = telemetry.power_kw / 3600 * self.UPDATE_PERIOD
+                self.battery_level = min(
+                    100.0, self.battery_level + charge_rate_per_second
+                )
+
+                if (
+                    self.simulation and
+                    self.target_battery_level
+                    and self.battery_level >= self.target_battery_level
+                ):
+                    self.logger.info(
+                        f"Target battery level reached: {self.battery_level:.1f}%"
+                    )
+                    self._finish_charging()
+
+        except Exception as e:
+            self.logger.error(f"Error processing node telemetry: {e}")
+
+    def _finish_charging(self) -> None:
+        """Complete the charging process and resume vehicle operation."""
+        self.is_charging = False
+        self._unsubscribe_from_charging_topics()
+        self.logger.info("Charging complete")

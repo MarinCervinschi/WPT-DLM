@@ -1,13 +1,41 @@
+import json
+from typing import Optional
+
 from shared.services import MQTTService
+from shared.mqtt_dtos import GeoLocation, VehicleRequest
 from smart_objects.resources import SmartObject, VehicleEngineResource
+from shared.simulation import ChargingRequestEmulator
 
 
 class ElectricVehicle(SmartObject):
-    def __init__(self, vehicle_id: str, mqtt_service: MQTTService, gpx_file_name: str):
+    def __init__(
+        self,
+        vehicle_id: str,
+        mqtt_service: MQTTService,
+        gpx_file_name: str,
+        simulation: bool = True,
+        static_position: Optional[GeoLocation] = None,
+    ):
         super().__init__(vehicle_id, mqtt_service)
 
-        engine_resource = VehicleEngineResource(f"{vehicle_id}_engine", gpx_file_name)
+        engine_resource = VehicleEngineResource(
+            f"{vehicle_id}_engine",
+            gpx_file_name,
+            simulation=simulation,
+            static_position=static_position,
+            mqtt_service=mqtt_service,
+            vehicle_id=vehicle_id,
+        )
         self.resource_map["engine"] = engine_resource
+
+        self.charging_request_service: Optional[ChargingRequestEmulator] = None
+        if simulation:
+            self.charging_request_service = ChargingRequestEmulator(
+                vehicle_id=vehicle_id,
+                mqtt_service=mqtt_service,
+                get_battery_level_callback=lambda: engine_resource.battery_level,
+                get_location_callback=lambda: engine_resource.current_location,
+            )
 
     def _register_resource_listeners(self) -> None:
         """Register listeners for resource data changes."""
@@ -21,3 +49,43 @@ class ElectricVehicle(SmartObject):
             retain=False,
         )
         engine_resource.add_data_listener(telemetry_listener)
+
+        request_topic = "iot/hubs/+/requests"
+        self.mqtt_service.subscribe(request_topic, self._on_charging_request)
+        self.logger.info(f"Subscribed to charging request topic: {request_topic}")
+
+    def _on_charging_request(self, msg) -> None:
+        """Handle charging request messages."""
+        try:
+            data = json.loads(msg.payload.decode())
+            request = VehicleRequest(**data)
+
+            if request.vehicle_id != self.object_id:
+                return
+
+            hub_id = msg.topic.split("/")[2]
+
+            self.logger.info(f"Received charging request for node {request.node_id}")
+
+            engine_resource = self.resource_map["engine"]
+            if isinstance(engine_resource, VehicleEngineResource):
+                engine_resource.handle_charging_request(hub_id, request.node_id)
+
+        except Exception as e:
+            self.logger.error(f"Error processing charging request: {e}")
+
+    def start(self) -> None:
+        """Start the vehicle and charging request service if in simulation mode."""
+        super().start()
+
+        if self.charging_request_service:
+            self.charging_request_service.start()
+            self.logger.info("Charging request service started")
+
+    def stop(self) -> None:
+        """Stop the vehicle and charging request service."""
+        if self.charging_request_service:
+            self.charging_request_service.stop()
+            self.logger.info("Charging request service stopped")
+
+        super().stop()
