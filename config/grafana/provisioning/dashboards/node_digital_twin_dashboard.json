@@ -678,7 +678,18 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "No vehicle connected",
+                  "color": "text"
+                }
+              },
+              "type": "special"
+            }
+          ],
           "max": 100,
           "min": 0,
           "thresholds": {
@@ -706,7 +717,8 @@
               }
             ]
           },
-          "unit": "percent"
+          "unit": "percent",
+          "noValue": "No vehicle connected"
         },
         "overrides": []
       },
@@ -721,7 +733,7 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": ["last"],
           "fields": ""
         },
         "showThresholdLabels": false,
@@ -751,7 +763,28 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "No vehicle connected",
+                  "color": "text"
+                }
+              },
+              "type": "special"
+            },
+            {
+              "options": {
+                "match": "empty",
+                "result": {
+                  "text": "No vehicle connected",
+                  "color": "text"
+                }
+              },
+              "type": "special"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -760,7 +793,8 @@
                 "value": null
               }
             ]
-          }
+          },
+          "noValue": "No vehicle connected"
         },
         "overrides": []
       },
@@ -778,7 +812,7 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": ["last"],
           "fields": "_value"
         },
         "textMode": "auto"
