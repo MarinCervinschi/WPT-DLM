@@ -132,9 +132,9 @@ class ChargingRequestEmulator:
             request = RecommendationRequest(
                 latitude=location.latitude,
                 longitude=location.longitude,
-                battery_level=self.get_battery_level(),
+                battery_level=int(self.get_battery_level()),
             )
-            
+
             response = requests.post(
                 f"{self.api_url}/recommendations",
                 json=request.model_dump(),
