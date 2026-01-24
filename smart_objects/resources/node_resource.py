@@ -1,8 +1,11 @@
+import json
 import threading
 from typing import ClassVar, Optional
 
 
 from shared.mqtt_dtos import NodeInfo, NodeStatus, NodeTelemetry, ChargingState
+from shared.mqtt_dtos.vehicle_dto import VehicleTelemetry
+from shared.services import MQTTService
 from smart_objects.actuators import L298NActuator
 from smart_objects.sensors import INA219Sensor, HC_SR04
 
@@ -31,12 +34,14 @@ class Node(SmartObjectResource):
         self,
         node_id: str,
         hub_id: str,
+        mqtt_service: Optional[MQTTService] = None,
         max_power_kw: float = 22.0,
         simulation: bool = True,
     ):
         super().__init__(resource_id=node_id)
         self.node_id = node_id
         self.hub_id = hub_id
+        self.mqtt_service = mqtt_service
         self.max_power_kw = max_power_kw
 
         self.power_sensor = INA219Sensor(simulation=simulation)
@@ -78,6 +83,7 @@ class Node(SmartObjectResource):
                 ChargingState.FAULTED,
             ):
                 self._stop_charging()
+                self.unsubscribe_from_vehicle_telemetry(self.connected_vehicle_id)  # type: ignore
 
             self.notify_update(message_type="status")
 
@@ -132,24 +138,6 @@ class Node(SmartObjectResource):
             f"Occupied={self.is_occupied}"
         )
 
-    def update_vehicle_info(
-        self,
-        is_occupied: bool,
-        connected_vehicle_id: Optional[str] = None,
-        current_vehicle_soc: Optional[int] = None,
-    ) -> None:
-        """
-        Update vehicle connection information.
-
-        Args:
-            is_occupied: Whether a vehicle is connected
-            connected_vehicle_id: ID of connected vehicle
-            current_vehicle_soc: Vehicle state of charge %
-        """
-        self.is_occupied = is_occupied
-        self.connected_vehicle_id = connected_vehicle_id
-        self.current_vehicle_soc = current_vehicle_soc
-
     def get_info(self) -> NodeInfo:
         """Get info message DTO (for retained info messages)."""
         return NodeInfo(
@@ -180,6 +168,9 @@ class Node(SmartObjectResource):
             try:
                 self.measure_sensors()
 
+                if self.current_state == ChargingState.FULL and not self.is_occupied:
+                    self.set_state(ChargingState.IDLE)
+
                 self.notify_update(message_type="telemetry")
             except Exception as e:
                 self.logger.error(f"Error in telemetry loop: {e}")
@@ -206,6 +197,55 @@ class Node(SmartObjectResource):
             self._stop_telemetry.set()
             self._telemetry_thread.join(timeout=5)
             self.logger.info("🔴 Stopped telemetry updates")
+
+    def subscribe_to_vehicle_telemetry(self, vehicle_id: str) -> None:
+        """Subscribe to vehicle telemetry topic."""
+        if not self.mqtt_service:
+            self.logger.warning("No MQTT service available for subscription")
+            return
+
+        telemetry_topic = f"iot/vehicles/{vehicle_id}/telemetry"
+
+        def _on_vehicle_telemetry_message(msg) -> None:
+            """Handle vehicle telemetry messages during charging."""
+            try:
+                data = json.loads(msg.payload.decode())
+                telemetry = VehicleTelemetry(**data)
+
+                if telemetry.battery_level is not None:
+                    self.current_vehicle_soc = telemetry.battery_level
+
+                if not telemetry.is_charging:
+                    self.set_state(ChargingState.FULL)
+
+                self.logger.info(
+                    f"📊 Received telemetry from vehicle {vehicle_id}: "
+                    f"SoC={telemetry.battery_level}%"
+                )
+
+            except Exception as e:
+                self.logger.error(f"Error processing vehicle telemetry message: {e}")
+
+        self.mqtt_service.subscribe(telemetry_topic, _on_vehicle_telemetry_message)
+        self.logger.info(f"🔔 Subscribed to {telemetry_topic}")
+
+    def unsubscribe_from_vehicle_telemetry(self, vehicle_id: str) -> None:
+        """Unsubscribe from vehicle telemetry topic."""
+        if (
+            not self.mqtt_service
+            or not self.connected_vehicle_id
+            or not self.current_vehicle_soc
+        ):
+            return
+
+        telemetry_topic = f"iot/vehicles/{vehicle_id}/telemetry"
+
+        self.mqtt_service.unsubscribe(telemetry_topic)
+
+        self.logger.info(f"🔕 Unsubscribed from {telemetry_topic}")
+
+        self.connected_vehicle_id = None
+        self.current_vehicle_soc = None
 
     def __str__(self) -> str:
         actuator_state = self.charging_actuator.get_current_state()

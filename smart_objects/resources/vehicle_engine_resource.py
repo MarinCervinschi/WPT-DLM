@@ -160,7 +160,7 @@ class VehicleEngineResource(SmartObjectResource):
     def _apply_charging(self) -> None:
         """Apply charging using power from node telemetry."""
         if self._current_charging_power_kw > 0:
-            base_rate = 2  # Base % increase per second
+            base_rate = 1.5  # Base % increase per second
             power_factor = self._current_charging_power_kw / 78  # INA219 max power
             charge_rate_per_second = base_rate * power_factor
 

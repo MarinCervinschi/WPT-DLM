@@ -8,6 +8,7 @@ from shared.mqtt_dtos import (
     HubInfo,
     HubStatus,
 )
+from shared.mqtt_dtos.vehicle_dto import VehicleRequest
 from shared.policies import IPolicy, EqualSharingPolicy, PowerAllocation
 from shared.services import DLMService, MQTTService
 from smart_objects.resources import Node, SmartObject
@@ -80,6 +81,7 @@ class Hub(SmartObject):
         node = Node(
             node_id=node_id,
             hub_id=self.hub_id,
+            mqtt_service=self.mqtt_service,
             max_power_kw=max_power_kw,
             simulation=simulation,
         )
@@ -193,7 +195,7 @@ class Hub(SmartObject):
         if node:
             node.set_power_limit(allocation.allocated_power_kw)
 
-    def _handle_vehicle_assignment(self, request) -> None:
+    def _handle_vehicle_assignment(self, request: VehicleRequest) -> None:
         """
         Handle vehicle assignment to node.
         Updates node with vehicle info and starts charging.
@@ -202,6 +204,8 @@ class Hub(SmartObject):
         if node:
             node.connected_vehicle_id = request.vehicle_id
             node.current_vehicle_soc = request.soc_percent
+
+            node.subscribe_to_vehicle_telemetry(request.vehicle_id)
 
             node.measure_sensors()
             if node.is_occupied is False:
