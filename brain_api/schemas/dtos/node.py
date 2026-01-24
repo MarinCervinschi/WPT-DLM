@@ -30,7 +30,6 @@ class NodeCreate(NodeBase):
 class NodeUpdate(BaseModel):
     """Schema for updating a Node. All fields are optional."""
 
-    name: Optional[str] = Field(None, max_length=100)
     max_power_kw: Optional[float] = Field(None, gt=0, le=350)
     is_maintenance: Optional[bool] = None
 

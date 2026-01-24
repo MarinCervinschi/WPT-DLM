@@ -4,9 +4,6 @@ from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 
 
-
-
-
 class DLMNotification(BaseModel):
     """
     Topic: iot/hubs/+/dlm/events
