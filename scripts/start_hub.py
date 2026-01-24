@@ -7,6 +7,7 @@ sys.path.insert(0, str(project_root))
 
 from shared.mqtt_dtos import GeoLocation
 from shared.services.mqtt_service import MQTTService
+from shared.policies import PriorityPolicy
 from smart_objects.hub import Hub
 
 import logging
@@ -19,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger("dlm_priority_example")
 
 # Enable DEBUG for specific service
-logging.getLogger("DLMService-hub_01").setLevel(logging.DEBUG)
+#logging.getLogger("DLMService-hub_01").setLevel(logging.DEBUG)
 
 
 def main():
@@ -38,20 +39,21 @@ def main():
             hub_id="hub_01",
             mqtt_service=mqtt_service,
             location=GeoLocation(latitude=44.6469, longitude=10.9252, altitude=50.0),
-            max_grid_capacity_kw=60.0,  # Limited grid capacity
+            max_grid_capacity_kw=180.0,  # Limited grid capacity
             firmware_version="1.0.0",
             dlm_interval=5.0,  # Apply policy every 5 seconds
+            dlm_policy=PriorityPolicy(max_grid_capacity_kw=180.0),
         )
 
-        hub.add_node(node_id="node_01", max_power_kw=22.0, simulation=True)
-        hub.add_node(node_id="node_02", max_power_kw=50.0, simulation=True)
-        hub.add_node(node_id="node_03", max_power_kw=22.0, simulation=True)
+        hub.add_node(node_id="node_01", max_power_kw=78.0, simulation=True)
+        hub.add_node(node_id="node_02", max_power_kw=78.0, simulation=True)
+        hub.add_node(node_id="node_03", max_power_kw=78.0, simulation=True)
 
         hub.start()
 
         print("\n" + "=" * 60)
         print("🏁 Hub started - listening for vehicle requests")
-        print("📊 Grid capacity: 60kW | DLM Policy: Priority")
+        print("📊 Grid capacity: 180kW | DLM Policy: Priority")
         print("=" * 60 + "\n")
 
         try:
