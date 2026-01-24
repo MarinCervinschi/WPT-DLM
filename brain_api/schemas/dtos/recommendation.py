@@ -1,7 +1,3 @@
-"""
-Recommendation DTOs - Pydantic schemas for charging recommendations.
-"""
-
 from pydantic import BaseModel, Field
 
 
@@ -26,6 +22,4 @@ class RecommendationResponse(BaseModel):
     estimated_wait_time_min: int = Field(
         ..., description="Estimated wait time in minutes"
     )
-    available_power_kw: float = Field(
-        ..., description="Available charging power in kW"
-    )
+    available_power_kw: float = Field(..., description="Available charging power in kW")

@@ -1,7 +1,3 @@
-"""
-Node DTOs - Pydantic schemas for Node entity.
-"""
-
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field

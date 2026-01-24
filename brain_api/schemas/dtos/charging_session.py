@@ -1,7 +1,3 @@
-"""
-ChargingSession DTOs - Pydantic schemas for ChargingSession entity.
-"""
-
 from datetime import datetime
 from typing import Optional
 

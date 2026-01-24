@@ -1,7 +1,3 @@
-"""
-ChargingRequest DTOs - Pydantic schemas for charging requests via QR code.
-"""
-
 from pydantic import BaseModel, Field
 
 

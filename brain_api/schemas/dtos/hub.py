@@ -1,7 +1,3 @@
-"""
-Hub DTOs - Pydantic schemas for Hub entity.
-"""
-
 from datetime import datetime
 from typing import Optional
 

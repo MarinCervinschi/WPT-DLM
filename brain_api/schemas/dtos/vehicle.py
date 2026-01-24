@@ -1,7 +1,3 @@
-"""
-Vehicle DTOs - Pydantic schemas for Vehicle entity.
-"""
-
 from datetime import datetime
 from typing import Optional
 

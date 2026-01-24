@@ -1,7 +1,3 @@
-"""
-DLMEvent DTOs - Pydantic schemas for DLMEvent entity.
-"""
-
 from datetime import datetime
 from typing import Optional
 
