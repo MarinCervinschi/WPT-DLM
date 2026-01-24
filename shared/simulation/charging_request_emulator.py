@@ -6,6 +6,7 @@ import requests
 
 from shared.mqtt_dtos import GeoLocation, VehicleRequest
 from shared.services import MQTTService
+from brain_api.schemas.dtos.recommendation import RecommendationRequest
 
 
 class ChargingRequestEmulator:
@@ -30,9 +31,8 @@ class ChargingRequestEmulator:
         self.get_location = get_location_callback
         self.api_url = api_url
 
-        
         self.logger = logging.getLogger(f"ChargingRequestEmulator-{vehicle_id}")
-        
+
         self._battery_threshold = self._sample_battery_threshold()
         self._monitor_thread: Optional[threading.Thread] = None
         self._stop_monitor = threading.Event()
@@ -128,12 +128,16 @@ class ChargingRequestEmulator:
     ) -> Optional[Dict[str, Any]]:
         """Get charging recommendation from API or return mock data."""
         try:
+
+            request = RecommendationRequest(
+                latitude=location.latitude,
+                longitude=location.longitude,
+                battery_level=self.get_battery_level(),
+            )
+            
             response = requests.post(
                 f"{self.api_url}/recommendations",
-                json={
-                    "latitude": location.latitude,
-                    "longitude": location.longitude,
-                },
+                json=request.model_dump(),
                 timeout=5,
             )
 
