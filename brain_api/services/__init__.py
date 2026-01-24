@@ -4,6 +4,7 @@ from .charging_session import ChargingSessionService
 from .dlm import DLMService
 from .hub import HubService
 from .node import NodeService
+from .recommendation import RecommendationService
 from .vehicle import VehicleService
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "ChargingSessionService",
     "ChargingRequestService",
     "DLMService",
+    "RecommendationService",
 ]

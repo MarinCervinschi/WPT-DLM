@@ -23,6 +23,7 @@ from .dtos.dlm_event import (
     DLMEventStats,
     DLMTriggerReason,
 )
+from .dtos.recommendation import RecommendationRequest, RecommendationResponse
 
 # DTOs
 from .dtos.hub import (
@@ -99,4 +100,7 @@ __all__ = [
     "DLMEventListResponse",
     "DLMEventStats",
     "DLMTriggerReason",
+    # Recommendation DTOs
+    "RecommendationRequest",
+    "RecommendationResponse",
 ]
