@@ -25,6 +25,7 @@ class Node(SmartObjectResource):
     VEHICLE_DETECTION_THRESHOLD: ClassVar[int] = (
         50  # Vehicle present if distance < 50cm
     )
+    TELEMETRY_INTERVAL: ClassVar[float] = 2.0  # seconds
 
     def __init__(
         self,
@@ -52,7 +53,6 @@ class Node(SmartObjectResource):
 
         self._telemetry_thread: Optional[threading.Thread] = None
         self._stop_telemetry = threading.Event()
-        self._telemetry_interval: float = 2.0  # seconds
 
     def set_state(self, new_state: ChargingState, error_code: int = 0) -> None:
         """
@@ -167,7 +167,7 @@ class Node(SmartObjectResource):
         return NodeTelemetry(
             voltage=self.power_sensor.get_value("voltage"),
             current=self.power_sensor.get_value("current"),
-            power_kw=self.power_sensor.get_value("power") / 1000.0,  # W to kW
+            power_kw=self.power_sensor.get_value("power"),
             power_limit_kw=self.power_limit_kw,
             is_occupied=self.is_occupied,
             connected_vehicle_id=self.connected_vehicle_id,
@@ -184,7 +184,7 @@ class Node(SmartObjectResource):
             except Exception as e:
                 self.logger.error(f"Error in telemetry loop: {e}")
 
-            self._stop_telemetry.wait(self._telemetry_interval)
+            self._stop_telemetry.wait(self.TELEMETRY_INTERVAL)
 
     def start_periodic_event_update_task(self) -> None:
         """Start periodic telemetry updates."""
@@ -197,7 +197,7 @@ class Node(SmartObjectResource):
             )
             self._telemetry_thread.start()
             self.logger.info(
-                f"🟢 Started telemetry updates (every {self._telemetry_interval}s)"
+                f"🟢 Started telemetry updates (every {self.TELEMETRY_INTERVAL}s)"
             )
 
     def stop_periodic_event_update_task(self) -> None:
