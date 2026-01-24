@@ -8,6 +8,7 @@ from shared.mqtt_dtos.vehicle_dto import VehicleTelemetry
 from shared.services import MQTTService
 from smart_objects.actuators import L298NActuator
 from smart_objects.sensors import INA219Sensor, HC_SR04
+from edge.gateway import ArduinoSerialBridge
 
 from .smart_object_resource import SmartObjectResource
 
@@ -37,6 +38,7 @@ class Node(SmartObjectResource):
         mqtt_service: Optional[MQTTService] = None,
         max_power_kw: float = 22.0,
         simulation: bool = True,
+        serial_port: str = "COM3"
     ):
         super().__init__(resource_id=node_id)
         self.node_id = node_id
@@ -44,9 +46,20 @@ class Node(SmartObjectResource):
         self.mqtt_service = mqtt_service
         self.max_power_kw = max_power_kw
 
-        self.power_sensor = INA219Sensor(simulation=simulation)
-        self.distance_sensor = HC_SR04(simulation=simulation)
-        self.charging_actuator = L298NActuator(simulation=simulation)
+        self.bridge = None
+        if not simulation:
+            try:
+                # Creiamo l'istanza e connettiamo
+                self.bridge = ArduinoSerialBridge(port=serial_port)
+                self.bridge.connect()
+                self.logger.info(f"Bridge initialized on {serial_port}")
+            except Exception as e:
+                self.logger.error(f"Failed to init bridge: {e}. Fallback to simulation.")
+                simulation = True
+
+        self.power_sensor = INA219Sensor(bridge=self.bridge, simulation=simulation)
+        self.distance_sensor = HC_SR04(bridge=self.bridge, simulation=simulation)
+        self.charging_actuator = L298NActuator(bridge=self.bridge, simulation=simulation)
 
         self.current_state: ChargingState = ChargingState.IDLE
         self.error_code: int = 0
@@ -197,6 +210,10 @@ class Node(SmartObjectResource):
             self._stop_telemetry.set()
             self._telemetry_thread.join(timeout=5)
             self.logger.info("🔴 Stopped telemetry updates")
+
+        if self.bridge:
+            self.bridge.disconnect()
+            self.logger.info("Bridge disconnected.")
 
     def subscribe_to_vehicle_telemetry(self, vehicle_id: str) -> None:
         """Subscribe to vehicle telemetry topic."""

@@ -1,25 +1,16 @@
-/* DLM Smart Vehicle - Power Feedback
-    It reads the light intensity received from the station and uses the RGB LED 
-    to indicate the power range delivered by the DLM system.
-
-    The circuit:
-    * Input: Photoresistor (A0) to measure light intensity
-    * Output: RGB LED (Red: Pin 6, Yellow/Green: Pin 5, Blue: Pin 3)
-*/
-
 #include <Arduino.h>
 
 // Hardware Pins Definition
 const int PHOTO_SENSOR_PIN = A0;
-const int RED_LED_PIN = 9;
+const int RED_LED_PIN = 11;
 const int GREEN_LED_PIN = 10;
-const int BLUE_LED_PIN = 11;
+const int BLUE_LED_PIN = 9;
 
 // System Constants
 const unsigned long UPDATE_INTERVAL = 100; 
-const int NO_LIGHT_THRESHOLD = 0;  
-const int LOW_LIGHT_THRESHOLD = 35; 
-const int MID_LIGHT_THRESHOLD = 65;
+const int THRESHOLD_OFF_TO_LOW = 100;  
+const int THRESHOLD_LOW_TO_MID = 350;  
+const int THRESHOLD_MID_TO_HIGH = 700;
 
 // State Variables
 unsigned long lastUpdateTime = 0;
@@ -43,7 +34,7 @@ void loop() {
         measuredLight = analogRead(PHOTO_SENSOR_PIN);
 
         // 2. Convert raw value to percentage (0–100)
-        lightPercent = (measuredLight * 100) / 1023;
+        lightPercent = map(measuredLight, 0, 1023, 0, 100);
 
         // 2. Manages visual feedback based on the received POWER
         updatePowerStatusLed();
@@ -57,20 +48,22 @@ void loop() {
 }
 
 void updatePowerStatusLed() {
-    if (lightPercent == NO_LIGHT_THRESHOLD) {
-        // Station Off or Unauthorized: LED Off
+    // Usiamo intervalli precisi basati sui raw values
+    
+    if (measuredLight < THRESHOLD_OFF_TO_LOW) {
+        // OFF: Copre il rumore e la luce ambientale (es. 0 - 99)
         setRgbColor(0, 0, 0);
     } 
-    else if (lightPercent <= LOW_LIGHT_THRESHOLD) {
-        // LOW POWER: Green (1% - 35%)
+    else if (measuredLight < THRESHOLD_LOW_TO_MID) {
+        // LOW POWER -> Green
         setRgbColor(0, 255, 0);
     }
-    else if (lightPercent <= MID_LIGHT_THRESHOLD) {
-        // MEDIUM POWER: Yellow (36% - 65%)
+    else if (measuredLight < THRESHOLD_MID_TO_HIGH) {
+        // MEDIUM POWER -> Yellow
         setRgbColor(255, 255, 0);
     }
     else {
-        // HIGH POWER: Red (66% - 100%)
+        // HIGH POWER -> Red
         setRgbColor(255, 0, 0);
     }
 }
