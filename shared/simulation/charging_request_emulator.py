@@ -30,9 +30,10 @@ class ChargingRequestEmulator:
         self.get_location = get_location_callback
         self.api_url = api_url
 
-        self.battery_threshold = self._sample_battery_threshold()
         
-        self.logger = logging.getLogger(f"ChargingRequestService-{vehicle_id}")
+        self.logger = logging.getLogger(f"ChargingRequestEmulator-{vehicle_id}")
+        
+        self._battery_threshold = self._sample_battery_threshold()
         self._monitor_thread: Optional[threading.Thread] = None
         self._stop_monitor = threading.Event()
         self._charging_requested = False
@@ -64,15 +65,15 @@ class ChargingRequestEmulator:
                 battery_level = self.get_battery_level()
 
                 if (
-                    battery_level <= self.battery_threshold
+                    battery_level <= self._battery_threshold
                     and not self._charging_requested
                 ):
                     self.logger.info(
-                        f"Battery below threshold ({self.battery_threshold:.1f}%), requesting charge"
+                        f"Battery below threshold ({self._battery_threshold:.1f}%), requesting charge"
                     )
                     self._request_charging()
-                    self.battery_threshold = self._sample_battery_threshold()
-                elif battery_level > self.battery_threshold:
+                    self._battery_threshold = self._sample_battery_threshold()
+                elif battery_level > self._battery_threshold:
                     self._charging_requested = False
 
             except Exception as e:
@@ -83,7 +84,9 @@ class ChargingRequestEmulator:
     def _sample_battery_threshold(self) -> int:
         """Sample battery threshold with slight random variation."""
 
-        return int(random.uniform(10, 40))
+        new_threshold = int(random.uniform(10, 40))
+        self.logger.info(f"New battery threshold set to {new_threshold}%")
+        return new_threshold
 
     def _request_charging(self) -> None:
         """Request charging from the recommendation API."""
