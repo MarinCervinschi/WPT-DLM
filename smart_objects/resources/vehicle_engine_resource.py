@@ -24,36 +24,33 @@ class VehicleEngineResource(SmartObjectResource):
     UPDATE_PERIOD: ClassVar[int] = 1  # seconds
     TASK_DELAY_TIME: ClassVar[int] = 5  # seconds
 
-    MIN_BATTERY_LEVEL: ClassVar[float] = 50.0
+    MIN_BATTERY_LEVEL: ClassVar[float] = 60.0
     MAX_BATTERY_LEVEL: ClassVar[float] = 90.0
     MIN_BATTERY_CONSUMPTION: ClassVar[float] = 0.05
-    MAX_BATTERY_CONSUMPTION: ClassVar[float] = 0.0
+    MAX_BATTERY_CONSUMPTION: ClassVar[float] = 0.1
 
     def __init__(
         self,
         resource_id: str,
-        gpx_file_name: str,
         simulation: bool = True,
-        static_position: Optional[GeoLocation] = None,
-        mqtt_service: Optional[MQTTService] = None,
         vehicle_id: Optional[str] = None,
+        gpx_file_name: Optional[str] = None,
+        mqtt_service: Optional[MQTTService] = None,
+        static_position: Optional[GeoLocation] = None,
     ):
         super().__init__(resource_id)
 
         self.gpx_file_name = gpx_file_name
         self.simulation = simulation
-        self.static_position = static_position
         self.mqtt_service = mqtt_service
         self.vehicle_id = vehicle_id
 
         self.way_point_list: List[GeoLocation] = []
-        self.current_location: Optional[GeoLocation] = None
+        self.current_location: Optional[GeoLocation] = static_position
         self._way_point_index: int = 0
         self._reverse: bool = False
 
-        self.battery_level: float = self.MIN_BATTERY_LEVEL + random.random() * (
-            self.MAX_BATTERY_LEVEL - self.MIN_BATTERY_LEVEL
-        )
+        self.battery_level: float = self._sample_initial_battery_level()
         self.target_battery_level: Optional[float] = None
 
         self.speed_kmh: float = 0.0
@@ -66,10 +63,18 @@ class VehicleEngineResource(SmartObjectResource):
         self._assigned_hub_id: Optional[str] = None
         self._assigned_node_id: Optional[str] = None
 
-        self._load_gpx_waypoints()
+        if self.simulation and self.gpx_file_name:
+            self._load_gpx_waypoints()
+
+    def _sample_initial_battery_level(self) -> float:
+        """Sample initial battery level between min and max."""
+        return self.MIN_BATTERY_LEVEL + random.random() * (
+            self.MAX_BATTERY_LEVEL - self.MIN_BATTERY_LEVEL
+        )
 
     def _load_gpx_waypoints(self) -> None:
         """Load waypoints from GPX file"""
+        assert self.gpx_file_name is not None, "GPX file name must be provided"
         try:
             with open(self.gpx_file_name, "r") as gpx_file:
                 gpx = gpxpy.parse(gpx_file)
@@ -111,9 +116,7 @@ class VehicleEngineResource(SmartObjectResource):
         time.sleep(self.TASK_DELAY_TIME)
         while not self._stop_update.is_set():
             try:
-                if not self.simulation:
-                    self.current_location = self.static_position
-                elif not self.is_charging:
+                if not self.is_charging and self.simulation and self.gpx_file_name:
                     current_point = self.way_point_list[self._way_point_index]
                     self.current_location = GeoLocation(
                         latitude=current_point.latitude,
@@ -244,9 +247,7 @@ class VehicleEngineResource(SmartObjectResource):
                     f"Charging started! Target: {self.target_battery_level:.1f}%"
                 )
 
-            elif (
-                status.state == ChargingState.FULL or status.state == ChargingState.IDLE
-            ):
+            else:
                 if self.is_charging and self.battery_level >= (
                     self.target_battery_level or 100
                 ):
@@ -263,14 +264,15 @@ class VehicleEngineResource(SmartObjectResource):
             telemetry = NodeTelemetry(**data)
 
             if self.is_charging and telemetry.power_kw > 0:
+                # TODO: to test realistic charging, consider time delta
                 charge_rate_per_second = telemetry.power_kw / 3600 * self.UPDATE_PERIOD
                 self.battery_level = min(
                     100.0, self.battery_level + charge_rate_per_second
                 )
 
                 if (
-                    self.simulation and
-                    self.target_battery_level
+                    self.simulation
+                    and self.target_battery_level
                     and self.battery_level >= self.target_battery_level
                 ):
                     self.logger.info(

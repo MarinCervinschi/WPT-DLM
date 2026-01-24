@@ -12,7 +12,7 @@ class ElectricVehicle(SmartObject):
         self,
         vehicle_id: str,
         mqtt_service: MQTTService,
-        gpx_file_name: str,
+        gpx_file_name: Optional[str] = None,
         simulation: bool = True,
         static_position: Optional[GeoLocation] = None,
     ):
@@ -20,11 +20,11 @@ class ElectricVehicle(SmartObject):
 
         engine_resource = VehicleEngineResource(
             f"{vehicle_id}_engine",
-            gpx_file_name,
             simulation=simulation,
-            static_position=static_position,
-            mqtt_service=mqtt_service,
             vehicle_id=vehicle_id,
+            gpx_file_name=gpx_file_name,
+            mqtt_service=mqtt_service,
+            static_position=static_position,
         )
         self.resource_map["engine"] = engine_resource
 
