@@ -123,7 +123,7 @@ class Hub(SmartObject):
         topic = f"iot/hubs/{self.hub_id}/status"
         payload = status.model_dump_json()
 
-        self.mqtt_service.publish(topic, payload, qos=1, retain=False)
+        self.mqtt_service.publish(topic, payload, qos=1, retain=True)
         self.logger.info(f"📤 Published HubStatus: {self.current_state.value}")
 
     def set_hub_state(self, new_state: ConnectionState) -> None:
@@ -155,7 +155,7 @@ class Hub(SmartObject):
                 message_type="status",
                 topic=f"iot/hubs/{self.hub_id}/nodes/{node_id}/status",
                 qos=1,
-                retain=False,
+                retain=True,
             )
             node_resource.add_data_listener(status_listener)
 
@@ -163,7 +163,7 @@ class Hub(SmartObject):
                 message_type="telemetry",
                 topic=f"iot/hubs/{self.hub_id}/nodes/{node_id}/telemetry",
                 qos=0,
-                retain=False,
+                retain=True,
             )
             node_resource.add_data_listener(telemetry_listener)
 
