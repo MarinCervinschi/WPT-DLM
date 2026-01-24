@@ -8,7 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .api import charging_request, dlm, health, hubs, nodes, sessions, vehicles, ws_telemetry
+from .api import charging_request, dlm, health, hubs, nodes, recommendations, sessions, vehicles, ws_telemetry
 from .api import dependencies
 from .core.config import settings
 from .core.logging import setup_logging
@@ -152,6 +152,7 @@ app.include_router(vehicles.router, tags=["Vehicles"])
 app.include_router(sessions.router, tags=["Charging Sessions"])
 app.include_router(dlm.router, tags=["Dynamic Load Management"])
 app.include_router(charging_request.router, tags=["Charging Requests"])
+app.include_router(recommendations.router, tags=["Recommendations"])
 app.include_router(ws_telemetry.router, tags=["WebSocket Telemetry"])
 
 

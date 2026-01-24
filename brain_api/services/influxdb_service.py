@@ -83,6 +83,88 @@ class InfluxDBService:
             # Return zeros if query fails
             return {"total_energy_kwh": 0.0, "avg_power_kw": 0.0}
 
+    def get_latest_node_telemetry(self, node_id: str) -> Optional[dict]:
+        """
+        Get the latest telemetry data for a specific node.
+
+        Args:
+            node_id: Node identifier
+
+        Returns:
+            Dictionary with latest telemetry data or None if not found
+        """
+        query = f"""
+        from(bucket: "{self.bucket}")
+          |> range(start: -1h)
+          |> filter(fn: (r) => r["_measurement"] == "node_telemetry")
+          |> filter(fn: (r) => r["node_id"] == "{node_id}")
+          |> last()
+        """
+
+        try:
+            result = self.query_api.query(query=query, org=settings.INFLUXDB_ORG)
+
+            telemetry = {}
+            for table in result:
+                for record in table.records:
+                    field = record.get_field()
+                    value = record.get_value()
+                    telemetry[field] = value
+
+            if telemetry:
+                logger.debug(f"Latest telemetry for node {node_id}: {telemetry}")
+                return telemetry
+
+            return None
+
+        except Exception as e:
+            logger.error(f"Error querying InfluxDB for node telemetry: {e}")
+            return None
+
+    def get_nodes_current_state(self, node_ids: list[str]) -> dict[str, dict]:
+        """
+        Get current state for multiple nodes.
+
+        Args:
+            node_ids: List of node identifiers
+
+        Returns:
+            Dictionary mapping node_id to telemetry data
+        """
+        if not node_ids:
+            return {}
+
+        node_filter = " or ".join([f'r["node_id"] == "{nid}"' for nid in node_ids])
+
+        query = f"""
+        from(bucket: "{self.bucket}")
+          |> range(start: -1h)
+          |> filter(fn: (r) => r["_measurement"] == "node_telemetry")
+          |> filter(fn: (r) => {node_filter})
+          |> last()
+        """
+
+        try:
+            result = self.query_api.query(query=query, org=settings.INFLUXDB_ORG)
+
+            nodes_state = {}
+            for table in result:
+                for record in table.records:
+                    node_id = record.values.get("node_id")
+                    if node_id not in nodes_state:
+                        nodes_state[node_id] = {}
+
+                    field = record.get_field()
+                    value = record.get_value()
+                    nodes_state[node_id][field] = value
+
+            logger.debug(f"Retrieved state for {len(nodes_state)} nodes")
+            return nodes_state
+
+        except Exception as e:
+            logger.error(f"Error querying InfluxDB for nodes state: {e}")
+            return {}
+
     def close(self):
         """Close InfluxDB client connection."""
         if self.client:
