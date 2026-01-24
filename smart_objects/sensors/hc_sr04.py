@@ -1,6 +1,8 @@
 import random
 import time
+from typing import Optional
 
+from edge.gateway.bridge.serial_bridge import ArduinoSerialBridge
 from smart_objects.models import Sensor
 
 
@@ -11,7 +13,7 @@ class HC_SR04(Sensor):
     DATA_TYPE = float
     MEASUREMENT_PRECISION = 2
 
-    def __init__(self, simulation: bool = False):
+    def __init__(self, bridge: Optional[ArduinoSerialBridge] = None, simulation: bool = False):
         super().__init__(
             type=self.RESOURCE_TYPE,
             values={
@@ -25,7 +27,7 @@ class HC_SR04(Sensor):
             },
             timestamp=0,
         )
-
+        self.bridge = bridge
         self.simulation = simulation
 
     def measure(self) -> None:
@@ -33,8 +35,14 @@ class HC_SR04(Sensor):
             distance = random.uniform(2.0, 60.0)
             self.simulate_measurement(distance)
         else:
-            # TODO: Implement actual HC-SR04 hardware measurement logic here
-            pass
+            if self.bridge:
+                try:
+                    distance = self.bridge.get_distance()
+                    self.values.update(distance=distance)
+                    self.timestamp = int(time.time() * 1000)
+                except Exception as e:
+                    raise RuntimeError(f"Failed to read distance from HC-SR04: {e}")
+            
 
     def simulate_measurement(self, distance: float) -> None:
         self.values.update(

@@ -1,6 +1,8 @@
 import random
 import time
+from typing import Optional
 
+from edge.gateway.bridge.serial_bridge import ArduinoSerialBridge
 from smart_objects.models import Sensor
 
 
@@ -12,7 +14,7 @@ class INA219Sensor(Sensor):
     DATA_TYPE = float
     MEASUREMENT_PRECISION = 3
 
-    def __init__(self, simulation: bool = False):
+    def __init__(self, bridge: Optional[ArduinoSerialBridge] = None, simulation: bool = False):
         super().__init__(
             type=self.RESOURCE_TYPE,
             values={
@@ -34,6 +36,7 @@ class INA219Sensor(Sensor):
         )
 
         self.simulation = simulation
+        self.bridge = bridge
 
     def measure(self) -> None:
         if self.simulation:
@@ -41,9 +44,14 @@ class INA219Sensor(Sensor):
             current = random.uniform(0.0, 3.2)
             self.simulate_measurement(voltage, current)
         else:
-            # TODO: Implement actual INA219 hardware measurement logic here
-            pass
-
+            if self.bridge:
+                try:
+                    v, i, p = self.bridge.get_power_data()
+                    self.values.update(voltage=v, current=i, power=p)
+                    self.timestamp = int(time.time() * 1000)
+                except Exception as e:
+                    raise RuntimeError(f"Failed to read power data from INA219: {e}")
+                
     def simulate_measurement(self, voltage: float, current: float) -> None:
         power = voltage * current
 
