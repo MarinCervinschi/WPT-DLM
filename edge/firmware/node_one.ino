@@ -58,6 +58,13 @@ void setup()
 
 void loop()
 {
+    distance = readDistance();
+    isVehiclePresent = (distance > 0 && distance <= DETECTION_THRESHOLD_CM) ? 1 : 0;
+
+    voltage = powerMonitor.getBusVoltage_V();
+    current = powerMonitor.getCurrent_mA();
+    power = voltage * (current / 1000.0);
+
     // 1. SERIAL COMUNICATION (Priority)
     if (Serial.available() > 0) {
         String cmd = Serial.readStringUntil('\n');
@@ -142,7 +149,7 @@ long readDistance()
     return measuredDistance;
 }
 
-void updateStatusDisplay(float power=0.0) {
+void updateStatusDisplay(float power) {
     statusDisplay.clear(); 
     statusDisplay.setCursor(0, 0);
     
