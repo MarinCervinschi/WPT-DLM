@@ -37,15 +37,12 @@ class InfluxDBService:
         Returns:
             Dictionary with total_energy_kwh and avg_power_kw
         """
-        # Use current time if end_time is None
         start_time_str = start_time.strftime("%Y-%m-%dT%H:%M:%S")
 
         now_utc = datetime.now(timezone.utc)
         end_time_val = end_time if end_time else now_utc
         end_time_str = end_time_val.strftime("%Y-%m-%dT%H:%M:%S")
 
-        # Flux query to calculate total energy and average power
-        # Energy is calculated by integrating power over time
         query = f"""
         data = from(bucket: "{self.bucket}")
           |> range(start: {start_time_str}Z, stop: {end_time_str}Z)
@@ -61,7 +58,6 @@ class InfluxDBService:
             result = self.query_api.query(query=query, org=settings.INFLUXDB_ORG)
 
             metrics = {"total_energy_kwh": 0.0, "avg_power_kw": 0.0}
-            # Parse results
             for table in result:
                 for record in table.records:
                     if record["result"] == "avg":
@@ -80,7 +76,6 @@ class InfluxDBService:
 
         except Exception as e:
             self.logger.error(f"Error querying InfluxDB for session metrics: {e}")
-            # Return zeros if query fails
             return {"total_energy_kwh": 0.0, "avg_power_kw": 0.0}
 
     def get_latest_node_telemetry(self, node_id: str) -> Optional[dict]:
