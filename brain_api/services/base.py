@@ -65,6 +65,14 @@ class BaseService(
 
     def create(self, data: CreateSchemaT) -> ResponseSchemaT:
         """Create a new entity."""
+        pk = data.model_dump().get("vehicle_id")
+        vehicle = self.repo.get(pk)
+
+        if vehicle:
+            raise ValueError(
+                f"{self.repo.model.__name__} with {self.repo.pk_field}={pk} already exists."
+            )
+
         entity = self.repo.create(data.model_dump())
         self.db.commit()
         self.logger.info(
