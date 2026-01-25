@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from brain_api.api.dependencies import get_db, get_mqtt_service
+from brain_api.api.dependencies import get_db, get_mqtt_service, get_influx_service
 from brain_api.schemas import ChargingRequestCreate, ChargingRequestResponse
 from brain_api.services import ChargingRequestService
 
@@ -19,6 +19,7 @@ async def request_charging(
     request_data: ChargingRequestCreate,
     db=Depends(get_db),
     mqtt_service=Depends(get_mqtt_service),
+    influx_service=Depends(get_influx_service),
 ):
     """
     Request a charging session for a vehicle at a specific node.
@@ -26,5 +27,5 @@ async def request_charging(
     The QR code scan provides the node ID, and the app provides the vehicle ID.
     This publishes a message to the MQTT topic for the hub to process.
     """
-    service = ChargingRequestService(db, mqtt_service)
+    service = ChargingRequestService(db, mqtt_service, influx_service)
     return service.request_charging(node_id=node_id, vehicle_id=request_data.vehicle_id)

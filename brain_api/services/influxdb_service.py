@@ -165,6 +165,45 @@ class InfluxDBService:
             logger.error(f"Error querying InfluxDB for nodes state: {e}")
             return {}
 
+    def get_latest_vehicle_telemetry(self, vehicle_id: str) -> Optional[dict]:
+        """
+        Get the latest telemetry data for a specific vehicle.
+
+        Args:
+            vehicle_id: Vehicle identifier
+
+        Returns:
+            Dictionary with latest telemetry data (including battery_level) or None if not found
+        """
+        query = f"""
+        from(bucket: "{self.bucket}")
+          |> range(start: -1h)
+          |> filter(fn: (r) => r["_measurement"] == "vehicle_telemetry")
+          |> filter(fn: (r) => r["vehicle_id"] == "{vehicle_id}")
+          |> last()
+        """
+
+        try:
+            result = self.query_api.query(query=query, org=settings.INFLUXDB_ORG)
+
+            telemetry = {}
+            for table in result:
+                for record in table.records:
+                    field = record.get_field()
+                    value = record.get_value()
+                    telemetry[field] = value
+
+            if telemetry:
+                logger.debug(f"Latest telemetry for vehicle {vehicle_id}: {telemetry}")
+                return telemetry
+            else:
+                logger.warning(f"No telemetry found for vehicle {vehicle_id}")
+                return None
+
+        except Exception as e:
+            logger.error(f"Error querying InfluxDB for vehicle telemetry: {e}")
+            return None
+
     def close(self):
         """Close InfluxDB client connection."""
         if self.client:

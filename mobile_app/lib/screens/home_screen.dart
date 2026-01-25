@@ -23,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? _lastTelemetryData;
   bool _isLoading = true;
   Stream<String>? _realTimeTelemetryStream;
+  DateTime? _lastCacheSaveTime;
 
   @override
   void initState() {
@@ -55,8 +56,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveTelemetryToCache(Map<String, dynamic> data) async {
     try {
+      // Throttling: salva solo se sono passati almeno 5 secondi dall'ultimo salvataggio
+      final now = DateTime.now();
+      if (_lastCacheSaveTime != null) {
+        final difference = now.difference(_lastCacheSaveTime!);
+        if (difference.inSeconds < 5) {
+          return; // Salta il salvataggio
+        }
+      }
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('last_telemetry_data', jsonEncode(data));
+      _lastCacheSaveTime = now;
       logger.d('Dati telemetria salvati in cache');
     } catch (e) {
       logger.e('Errore salvataggio telemetria in cache: $e');
@@ -74,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     logger.i('Vehicle ID trovato: $_vehicleId');
     if (_vehicleId != null) {
       _channel = WebSocketChannel.connect(
-        Uri.parse('ws://localhost:8000/ws/telemetry/$_vehicleId'),
+        Uri.parse('ws://172.20.10.2:8000/ws/telemetry/$_vehicleId'),
       );
       logger.i('Connesso a WebSocket per veicolo $_vehicleId');
 
@@ -230,7 +241,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         Map<String, dynamic> telemetryData;
                         try {
                           telemetryData = jsonDecode(snapshot.data!);
-                          logger.d('Dati telemetria ricevuti: $telemetryData');
                           
                           // Salva i nuovi dati in cache e aggiorna lo stato
                           _lastTelemetryData = telemetryData;

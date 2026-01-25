@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:collection/collection.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import '../services/location_service.dart';
 import '../services/hub_service.dart';
+import '../services/recommendation_service.dart';
+import '../services/telemetry_cache_service.dart';
 import '../models/hub.dart';
+import '../models/recommendation.dart';
 import '../widgets/hub_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/toggle_button.dart';
@@ -18,12 +23,13 @@ class ChargingMapPage extends StatefulWidget {
   State<ChargingMapPage> createState() => _ChargingMapPageState();
 }
 
-class _ChargingMapPageState extends State<ChargingMapPage> {
+class _ChargingMapPageState extends State<ChargingMapPage> with WidgetsBindingObserver {
   // Controllers
   GoogleMapController? _mapController;
 
   // State variables
   Position? _currentPosition;
+  bool _isMapActive = false;
   List<Hub>? _allHubs = []; // All hubs from API
   List<Hub>? _hubs = []; // Filtered hubs for display
   Hub? _selectedHub;
@@ -32,6 +38,10 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
   String _searchQuery = '';
   Marker? _selectedHubMarker;
   
+  // Cache per ottimizzazione performance
+  Set<Marker>? _cachedMarkers;
+  String? _lastMarkerState;
+
   // Custom marker icons
   BitmapDescriptor? _availableIcon;
   BitmapDescriptor? _unavailableIcon;
@@ -41,6 +51,8 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
   // Services
   final LocationService _locationService = LocationService();
   final HubService _hubService = HubService();
+  final RecommendationService _recommendationService = RecommendationService();
+  final TelemetryCacheService _telemetryCacheService = TelemetryCacheService();
 
   //default position (Modena, Italy)
   static const LatLng _defaultPosition = LatLng(44.647128, 10.925226);
@@ -48,14 +60,35 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadCustomMarkers();
     _initializeData();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _mapController?.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      _pauseMap();
+    }
+  }
+
+  void _activateMap() {
+    if (_isMapActive || !mounted) return;
+    setState(() => _isMapActive = true);
+    logger.d('Mappa attivata');
+  }
+
+  void _pauseMap() {
+    if (!_isMapActive || !mounted) return;
+    setState(() => _isMapActive = false);
+    logger.d('Mappa in pausa');
   }
 
   Future<void> _loadCustomMarkers() async {
@@ -63,7 +96,7 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
     _unavailableIcon = await CustomMarker.unavailableMarker();
     _selectedIcon = await CustomMarker.selectedMarker();
     _currentLocationIcon = await CustomMarker.currentLocationMarker();
-    
+
     // Trigger rebuild to show markers once loaded
     if (mounted) {
       setState(() {});
@@ -133,7 +166,17 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
   }
 
   Set<Marker> _buildMarkers() {
-    return {
+    // Calcola un hash per determinare se i marker devono essere ricostruiti
+    final currentState = '${_currentPosition?.latitude}_${_currentPosition?.longitude}_'
+        '${_hubs?.length}_${_selectedHub?.hubId}';
+    
+    // Se lo stato non è cambiato, usa la cache
+    if (_lastMarkerState == currentState && _cachedMarkers != null) {
+      return _cachedMarkers!;
+    }
+    
+    // Ricostruisci i marker solo se necessario
+    final markers = <Marker>{
       // 1. La tua posizione (BLU con icona personalizzata)
       if (_currentPosition != null)
         Marker(
@@ -168,11 +211,18 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
       // 3. L'hub selezionato (ARANCIONE con icona personalizzata più grande)
       if (_selectedHubMarker != null) _selectedHubMarker!,
     };
+    
+    // Aggiorna cache
+    _cachedMarkers = markers;
+    _lastMarkerState = currentState;
+    
+    return markers;
   }
 
   void _onHubTapped(Hub hub) {
     setState(() {
       _selectedHub = hub;
+      _cachedMarkers = null; // Invalida cache per ricostruire marker
 
       // Creiamo il marker per l'hub selezionato con icona personalizzata ARANCIONE
       if (hub.lat != null && hub.lon != null) {
@@ -196,6 +246,7 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
   void _filterHubs(String query) {
     setState(() {
       _searchQuery = query.toLowerCase().trim();
+      _cachedMarkers = null; // Invalida cache quando cambiano i filtri
 
       if (_searchQuery.isEmpty) {
         // If search is empty, show all hubs
@@ -215,7 +266,7 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
         if (_hubs != null && _hubs!.isNotEmpty) {
           final firstHub = _hubs!.first;
           _selectedHub = firstHub;
-          
+
           // Create the custom marker for the selected hub
           if (firstHub.lat != null && firstHub.lon != null) {
             _selectedHubMarker = Marker(
@@ -347,27 +398,45 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
   }
 
   Widget _buildMapView() {
-    return GoogleMap(
-      initialCameraPosition: CameraPosition(target: _initialPosition, zoom: 15),
-      onMapCreated: (controller) {
-        _mapController = controller;
-        if (_currentPosition != null) {
-          _moveCameraToCurrentPosition();
+    return VisibilityDetector(
+      key: const Key('charging-map-key'),
+      onVisibilityChanged: (visibilityInfo) {
+        final isVisible = visibilityInfo.visibleFraction > 0.1;
+        if (isVisible && !_isMapActive) {
+          _activateMap();
+        } else if (!isVisible && _isMapActive) {
+          _pauseMap();
         }
       },
-      markers: _buildMarkers(),
-      myLocationEnabled: false,
-      myLocationButtonEnabled: false,
-      zoomControlsEnabled: false,
-      onTap: (_) {
-        // Deseleziona l'hub quando si clicca sulla mappa
-        if (_selectedHub != null) {
-          setState(() {
-            _selectedHub = null;
-            _selectedHubMarker = null;
-          });
-        }
-      },
+      child: GoogleMap(
+        initialCameraPosition: CameraPosition(target: _initialPosition, zoom: 15),
+        onMapCreated: (controller) {
+          _mapController = controller;
+          if (_currentPosition != null) {
+            _moveCameraToCurrentPosition();
+          }
+        },
+        markers: _buildMarkers(),
+        myLocationEnabled: false,
+        myLocationButtonEnabled: false,
+        zoomControlsEnabled: false,
+        mapToolbarEnabled: false,
+        compassEnabled: false,
+        rotateGesturesEnabled: false,
+        tiltGesturesEnabled: false,
+        buildingsEnabled: false,
+        trafficEnabled: false,
+        onTap: (_) {
+          // Deseleziona l'hub quando si clicca sulla mappa
+          if (_selectedHub != null) {
+            setState(() {
+              _selectedHub = null;
+              _selectedHubMarker = null;
+              _cachedMarkers = null; // Invalida cache
+            });
+          }
+        },
+      ),
     );
   }
 
@@ -574,13 +643,191 @@ class _ChargingMapPageState extends State<ChargingMapPage> {
   // ACTIONS
   // ============================================================================
 
-  void _handleMLPrediction() {
-    // TODO: Implementa la chiamata al modello ML
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Funzionalità ML in arrivo...'),
-        duration: Duration(seconds: 2),
+  void _handleMLPrediction() async {
+    if (_currentPosition == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Posizione non disponibile'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    int? batteryLevel = await _telemetryCacheService.getCachedBatteryLevel();
+
+    if (batteryLevel == null) {
+      batteryLevel = await _showBatteryLevelDialog();
+      if (batteryLevel == null) return;
+    }
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          const Center(child: CircularProgressIndicator(color: Colors.white)),
+    );
+
+    try {
+      final recommendation = await _recommendationService.getRecommendation(
+        latitude: _currentPosition!.latitude,
+        longitude: _currentPosition!.longitude,
+        batteryLevel: batteryLevel,
+      );
+
+      // Chiudi loading
+      if (!mounted) return;
+      Navigator.of(context).pop();
+
+      final recommendedHub = _allHubs?.firstWhereOrNull(
+        (hub) => hub.hubId == recommendation.hubId,
+      );
+
+      if (recommendedHub == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hub did not found in the list'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      } 
+
+      _onHubTapped(recommendedHub);
+      // Mostra i dettagli della raccomandazione
+      if (mounted) {
+        _showRecommendationDialog(recommendation);
+      }      
+
+    } catch (e) {
+      // Chiudi loading
+      if (!mounted) return;
+      Navigator.of(context).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Errore: ${e.toString().replaceAll("Exception: ", "")}',
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
+  }
+
+  Future<int?> _showBatteryLevelDialog() async {
+    final controller = TextEditingController(text: '50');
+
+    return showDialog<int>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Livello Batteria'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Inserisci il livello attuale della batteria:'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                suffixText: '%',
+                border: OutlineInputBorder(),
+                hintText: '0-100',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Annulla'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final value = int.tryParse(controller.text);
+              if (value != null && value >= 0 && value <= 100) {
+                Navigator.of(context).pop(value);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Inserisci un valore tra 0 e 100'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
+            },
+            child: const Text('Conferma'),
+          ),
+        ],
       ),
+    );
+  }
+
+  void _showRecommendationDialog(Recommendation recommendation) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.bolt, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 8),
+            const Text('Raccommendation'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildRecommendationRow(
+              Icons.ev_station,
+              'Stazione',
+              recommendation.hubId,
+            ),
+            const SizedBox(height: 8),
+            _buildRecommendationRow(Icons.power, 'Nodo', recommendation.nodeId),
+            const SizedBox(height: 8),
+            _buildRecommendationRow(
+              Icons.route,
+              'Distanza',
+              '${recommendation.distanceKm.toStringAsFixed(2)} km',
+            ),
+            const SizedBox(height: 8),
+            _buildRecommendationRow(
+              Icons.schedule,
+              'Tempo attesa',
+              '~${recommendation.estimatedWaitTimeMin} min',
+            ),
+            const SizedBox(height: 8),
+            _buildRecommendationRow(
+              Icons.flash_on,
+              'Potenza',
+              '${recommendation.availablePowerKw.toStringAsFixed(1)} kW',
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Chiudi'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecommendationRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.blueGrey),
+        const SizedBox(width: 8),
+        Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+        Expanded(
+          child: Text(value, style: const TextStyle(color: Colors.black87)),
+        ),
+      ],
     );
   }
 
