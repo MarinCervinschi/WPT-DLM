@@ -1,5 +1,4 @@
 #include <Adafruit_INA219.h>
-#include <LiquidCrystal_I2C.h>
 
 // Hardware Pins Definition
 const int TRIGGER_PIN = 2;
@@ -25,7 +24,6 @@ float power = 0.0;
 
 // Sensor and display initialization
 Adafruit_INA219 powerMonitor;
-LiquidCrystal_I2C statusDisplay(0x27, 16, 2);
 
 void setup()
 {
@@ -45,15 +43,6 @@ void setup()
         // Se INA219 fallisce, segnalalo su seriale
         Serial.println("ERROR: INA219 NOT FOUND");
     }
-    
-    statusDisplay.init();
-    statusDisplay.backlight();
-
-    // Startup Message
-    statusDisplay.setCursor(0, 0);
-    statusDisplay.print("STATION 1");
-    statusDisplay.setCursor(0, 1);
-    statusDisplay.print("INITIALIZING...");
 }
 
 void loop()
@@ -90,7 +79,6 @@ void loop()
     // 3. UPDATE INTERFACE (LCD)
     if (millis() - lastDisplayTime >= DISPLAY_UPDATE_INTERVAL) {
         lastDisplayTime = millis();
-        updateStatusDisplay(power);
     }
 }
 
@@ -147,28 +135,4 @@ long readDistance()
 
     int measuredDistance = pulseDuration * 0.034 / 2;
     return measuredDistance;
-}
-
-void updateStatusDisplay(float power) {
-    statusDisplay.clear(); 
-    statusDisplay.setCursor(0, 0);
-    
-    if (isVehiclePresent == 1) {
-        if (status == "ON") {
-            statusDisplay.print("CHARGING PWM:");
-            statusDisplay.print(map(pwmLevel, 0, 255, 0, 100));
-            statusDisplay.print("%");
-            
-            statusDisplay.setCursor(0, 1);
-            statusDisplay.print(power, 1); statusDisplay.print("W");
-        } else {
-            statusDisplay.print("VEHICLE FOUND");
-            statusDisplay.setCursor(0, 1);
-            statusDisplay.print("WAITING AUTHORIZATION...");
-        }
-    } else {
-        statusDisplay.print("STATION READY");
-        statusDisplay.setCursor(0, 1);
-        statusDisplay.print("CONNECT PC...");
-    }
 }

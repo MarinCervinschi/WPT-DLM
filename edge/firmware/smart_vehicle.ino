@@ -8,9 +8,9 @@ const int BLUE_LED_PIN = 9;
 
 // System Constants
 const unsigned long UPDATE_INTERVAL = 100; 
-const int THRESHOLD_OFF_TO_LOW = 100;  
-const int THRESHOLD_LOW_TO_MID = 350;  
-const int THRESHOLD_MID_TO_HIGH = 700;
+const int THRESHOLD_OFF_TO_LOW = 400;  
+const int THRESHOLD_LOW_TO_MID = 630;  
+const int THRESHOLD_MID_TO_HIGH = 770;
 
 // State Variables
 unsigned long lastUpdateTime = 0;
