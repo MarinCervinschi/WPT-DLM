@@ -24,6 +24,9 @@ class NodeStatus(BaseModel):
     """
 
     state: ChargingState = Field(..., description="Current charging state")
+    current_vehicle_id: Optional[str] = Field(
+        default=None, max_length=50, description="ID of currently connected vehicle"
+    )
     error_code: int = Field(
         default=0, ge=0, le=9999, description="Error code (0 = no error)"
     )

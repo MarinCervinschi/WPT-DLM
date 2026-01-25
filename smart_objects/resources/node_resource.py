@@ -166,7 +166,11 @@ class Node(SmartObjectResource):
 
     def get_status(self) -> NodeStatus:
         """Get status message DTO (for state change messages)."""
-        return NodeStatus(state=self.current_state, error_code=self.error_code)
+        return NodeStatus(
+            state=self.current_state,
+            current_vehicle_id=self.connected_vehicle_id,
+            error_code=self.error_code,
+        )
 
     def get_telemetry(self) -> NodeTelemetry:
         """Get telemetry message DTO (for periodic measurements)."""

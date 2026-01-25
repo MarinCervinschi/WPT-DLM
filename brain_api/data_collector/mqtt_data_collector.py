@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy.orm import Session
 
@@ -211,10 +211,10 @@ class MQTTDataCollector:
             payload = json.loads(msg.payload.decode())
 
             node_status = NodeStatus(**payload)
-            import time
-            time.sleep(1)  # slight delay to ensure telemetry data is available
 
-            self._manage_charging_session(node_id, node_status.state)
+            self._manage_charging_session(
+                node_id, node_status.current_vehicle_id, node_status.state
+            )
             self.logger.debug(f"Updated node {node_id} status: {node_status.state}")
 
         except Exception as e:
@@ -222,12 +222,15 @@ class MQTTDataCollector:
                 f"Error processing node status message: {e}", exc_info=True
             )
 
-    def _manage_charging_session(self, node_id: str, state: ChargingState) -> None:
+    def _manage_charging_session(
+        self, node_id: str, vehicle_id: Optional[str], state: ChargingState
+    ) -> None:
         """
         Manage charging session based on node state.
 
         Args:
             node_id: Node identifier
+            vehicle_id: Optional vehicle identifier
             state: Current charging state
         """
         active_sessions = self.session_service.get_active(node_id=node_id)
@@ -235,15 +238,6 @@ class MQTTDataCollector:
 
         if state == ChargingState.CHARGING:
             if not has_active_session:
-                node_telemetry = self.influx_service.get_latest_node_telemetry(
-                    node_id=node_id
-                )
-
-                self.logger.info(f"Node telemetry for session start: {node_telemetry}")
-                vehicle_id = None
-                if node_telemetry and node_telemetry.get("is_occupied"):
-                    vehicle_id = node_telemetry.get("connected_vehicle_id")
-
                 start_data = ChargingSessionStart(
                     node_id=node_id, vehicle_id=vehicle_id
                 )
@@ -252,24 +246,23 @@ class MQTTDataCollector:
                     f"Started charging session {session.charging_session_id} for node {node_id} and vehicle {vehicle_id}"
                 )
         else:
-            if has_active_session:
-                for session in active_sessions:
-                    metrics = self.influx_service.get_session_metrics(
-                        node_id=node_id,
-                        start_time=session.start_time,
-                        end_time=None,
-                    )
+            for session in active_sessions:
+                metrics = self.influx_service.get_session_metrics(
+                    node_id=node_id,
+                    start_time=session.start_time,
+                    end_time=None,
+                )
 
-                    end_data = ChargingSessionEnd(
-                        total_energy_kwh=metrics["total_energy_kwh"],
-                        avg_power_kw=metrics["avg_power_kw"],
-                    )
-                    self.session_service.end(session.charging_session_id, end_data)
-                    self.logger.info(
-                        f"Ended charging session {session.charging_session_id} for node {node_id} "
-                        f"(state changed to {state.value}): "
-                        f"{metrics['total_energy_kwh']:.2f} kWh, {metrics['avg_power_kw']:.2f} kW avg"
-                    )
+                end_data = ChargingSessionEnd(
+                    total_energy_kwh=metrics["total_energy_kwh"],
+                    avg_power_kw=metrics["avg_power_kw"],
+                )
+                self.session_service.end(session.charging_session_id, end_data)
+                self.logger.info(
+                    f"Ended charging session {session.charging_session_id} for node {node_id} "
+                    f"(state changed to {state.value}): "
+                    f"{metrics['total_energy_kwh']:.2f} kWh, {metrics['avg_power_kw']:.2f} kW avg"
+                )
 
     def _on_dlm_event(self, msg) -> None:
         """
