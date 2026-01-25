@@ -38,7 +38,7 @@ class PriorityPolicy(IPolicy):
         for node_id, state in nodes_state.items():
             if (
                 state.get("is_occupied")
-                and state.get("state") == "CHARGING"
+                and state.get("state") == "charging"
                 and state.get("vehicle_id")
             ):
                 charging_nodes.append((node_id, state))

@@ -43,23 +43,18 @@ class DLMService:
 
         self.logger = logging.getLogger(f"DLMService-{hub_id}")
 
-        # Track current allocations to detect changes
         self._current_allocations: Dict[str, float] = {}
 
-        # Callback to get nodes state (provided by Hub)
         self._get_nodes_state_callback: Optional[Callable[[], Dict[str, Dict]]] = None
 
-        # Callback to apply allocations (provided by Hub)
         self._apply_allocation_callback: Optional[Callable[[PowerAllocation], None]] = (
             None
         )
 
-        # Callback to handle vehicle assignment (provided by Hub)
         self._handle_vehicle_assignment_callback: Optional[
             Callable[[VehicleRequest], None]
         ] = None
 
-        # Periodic DLM thread
         self._dlm_thread: Optional[threading.Thread] = None
         self._stop_dlm = threading.Event()
 
@@ -138,16 +133,13 @@ class DLMService:
 
         allocations = self.policy(nodes_state)
 
-        # Apply allocations and publish notifications for changes
         for alloc in allocations:
             old_limit = self._current_allocations.get(alloc.node_id)
             new_limit = alloc.allocated_power_kw
 
-            # Apply allocation
             self._apply_allocation_callback(alloc)
 
-            # Publish DLM notification if limit changed significantly
-            if old_limit is None or abs(old_limit - new_limit) > 0.1:
+            if old_limit is None or abs(old_limit - new_limit) > 1.5:
                 self._publish_dlm_notification(
                     node_id=alloc.node_id,
                     old_limit=old_limit or new_limit,
@@ -158,7 +150,6 @@ class DLMService:
                     ),
                 )
 
-                # Update tracked allocation
                 self._current_allocations[alloc.node_id] = new_limit
 
         return allocations
@@ -210,10 +201,8 @@ class DLMService:
 
     def start(self) -> None:
         """Start DLM service (subscribe to requests and start periodic thread)."""
-        # Subscribe to vehicle requests
         self.subscribe_to_requests()
 
-        # Start periodic DLM thread
         if self._dlm_thread is None or not self._dlm_thread.is_alive():
             self._stop_dlm.clear()
             self._dlm_thread = threading.Thread(
