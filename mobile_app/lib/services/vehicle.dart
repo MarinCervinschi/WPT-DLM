@@ -39,7 +39,7 @@ class ApiService {
 
   //POST
   Future<void> registerVehicle(Vehicle vehicle) async {
-    final url = Uri.parse('$baseUrl/vehicles');
+    final url = Uri.parse('$baseUrl/vehicles/${vehicle.id}/register');
 
     try {
       final response = await http.post(
