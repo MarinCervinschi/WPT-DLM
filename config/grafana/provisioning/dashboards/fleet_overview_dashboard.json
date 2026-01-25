@@ -82,8 +82,8 @@
         },
         {
             "datasource": {
-                "type": "influxdb",
-                "uid": "influxdb"
+                "type": "postgres",
+                "uid": "postgresql"
             },
             "fieldConfig": {
                 "defaults": {
@@ -129,10 +129,10 @@
             "targets": [
                 {
                     "datasource": {
-                        "type": "influxdb",
-                        "uid": "influxdb"
+                        "type": "postgres",
+                        "uid": "postgresql"
                     },
-                    "query": "from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"hub_status\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\")\n  |> filter(fn: (r) => r[\"_value\"] == \"online\")\n  |> group(columns: [\"hub_id\"])\n  |> last(column: \"_time\")\n  |> group()\n  |> count()\n  |> keep(columns: [\"_value\"])",
+                    "query": "SELECT COUNT(*) AS value FROM hubs WHERE is_active = true",
                     "refId": "A"
                 }
             ],
@@ -717,7 +717,7 @@
                         "type": "influxdb",
                         "uid": "influxdb"
                     },
-                    "query": "telemetry = from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"node_id\"])\n  |> last(column: \"_time\")\n\nstatus = from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_status\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\" or r[\"_field\"] == \"error_code\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"node_id\"])\n  |> last(column: \"_time\")\n\njoin(\n  tables: {t: telemetry, s: status},\n  on: [\"node_id\", \"hub_id\"]\n)\n|> keep(columns: [\"hub_id\", \"node_id\", \"state\", \"power_kw\", \"power_limit_kw\", \"is_occupied\", \"connected_vehicle_id\", \"current_vehicle_soc\", \"error_code\"])\n|> rename(columns: {hub_id: \"Hub ID\", node_id: \"Node ID\", state: \"State\", power_kw: \"Power (kW)\", power_limit_kw: \"Limit (kW)\", is_occupied: \"Occupied\", connected_vehicle_id: \"Vehicle ID\", current_vehicle_soc: \"SOC (%)\", error_code: \"Error\"})",
+                    "query": "telemetry = from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"node_id\"])\n  |> last(column: \"_time\")\n  |> group()\n\nstatus = from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_status\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\" or r[\"_field\"] == \"error_code\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"node_id\"])\n  |> last(column: \"_time\")\n  |> group()\n\njoin(\n  tables: {t: telemetry, s: status},\n  on: [\"node_id\", \"hub_id\"]\n)\n|> keep(columns: [\"hub_id\", \"node_id\", \"state\", \"power_kw\", \"power_limit_kw\", \"is_occupied\", \"connected_vehicle_id\", \"current_vehicle_soc\", \"error_code\"])\n|> rename(columns: {hub_id: \"Hub ID\", node_id: \"Node ID\", state: \"State\", power_kw: \"Power (kW)\", power_limit_kw: \"Limit (kW)\", is_occupied: \"Occupied\", connected_vehicle_id: \"Vehicle ID\", current_vehicle_soc: \"SOC (%)\", error_code: \"Error\"})",
                     "refId": "A"
                 }
             ],
@@ -861,7 +861,7 @@
                         "type": "influxdb",
                         "uid": "influxdb"
                     },
-                    "query": "from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"vehicle_id\"])\n  |> last(column: \"_time\")\n  |> keep(columns: [\"vehicle_id\", \"battery_level\", \"speed_kmh\", \"engine_temp_c\", \"is_charging\", \"geo_location_latitude\", \"geo_location_longitude\"])\n  |> rename(columns: {vehicle_id: \"Vehicle ID\", battery_level: \"Battery (%)\", speed_kmh: \"Speed (km/h)\", engine_temp_c: \"Temp (°C)\", is_charging: \"Charging\", geo_location_latitude: \"Latitude\", geo_location_longitude: \"Longitude\"})",
+                    "query": "from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"vehicle_id\"])\n  |> last(column: \"_time\")\n  |> group()\n  |> keep(columns: [\"vehicle_id\", \"battery_level\", \"speed_kmh\", \"engine_temp_c\", \"is_charging\", \"geo_location_latitude\", \"geo_location_longitude\"])\n  |> rename(columns: {vehicle_id: \"Vehicle ID\", battery_level: \"Battery (%)\", speed_kmh: \"Speed (km/h)\", engine_temp_c: \"Temp (°C)\", is_charging: \"Charging\", geo_location_latitude: \"Latitude\", geo_location_longitude: \"Longitude\"})",
                     "refId": "A"
                 }
             ],
@@ -1085,7 +1085,7 @@
             "type": "table"
         }
     ],
-    "refresh": "10s",
+    "refresh": "5s",
     "schemaVersion": 38,
     "style": "dark",
     "tags": [
