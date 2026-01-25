@@ -20,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger("dlm_priority_example")
 
 # Enable DEBUG for specific service
-#logging.getLogger("DLMService-hub_01").setLevel(logging.DEBUG)
+# logging.getLogger("DLMService-hub_01").setLevel(logging.DEBUG)
 
 
 def main():
@@ -35,14 +35,17 @@ def main():
             print("❌ Failed to connect to MQTT broker. Exiting.")
             return
 
+        HUB_ID = "hub_01"
+        MAX_GRID_CAPACITY_KW = 140.0
+
         hub = Hub(
-            hub_id="hub_01",
+            hub_id=HUB_ID,
             mqtt_service=mqtt_service,
             location=GeoLocation(latitude=44.6469, longitude=10.9252, altitude=50.0),
-            max_grid_capacity_kw=180.0,  # Limited grid capacity
+            max_grid_capacity_kw=MAX_GRID_CAPACITY_KW,
             firmware_version="1.0.0",
             dlm_interval=5.0,  # Apply policy every 5 seconds
-            dlm_policy=PriorityPolicy(max_grid_capacity_kw=180.0),
+            dlm_policy=PriorityPolicy(max_grid_capacity_kw=MAX_GRID_CAPACITY_KW),
         )
 
         hub.add_node(node_id="node_01", max_power_kw=78.0, simulation=True)
@@ -53,7 +56,7 @@ def main():
 
         print("\n" + "=" * 60)
         print("🏁 Hub started - listening for vehicle requests")
-        print("📊 Grid capacity: 180kW | DLM Policy: Priority")
+        print(f"📊 Grid capacity: {MAX_GRID_CAPACITY_KW}kW | DLM Policy: Priority")
         print("=" * 60 + "\n")
 
         try:

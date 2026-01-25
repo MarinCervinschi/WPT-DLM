@@ -20,47 +20,54 @@ logger = logging.getLogger("vehicle_emulator")
 
 
 def main():
-    VEHICLE_ID = "vehicle_001"
     MQTT_BROKER_HOST = "localhost"
     MQTT_BROKER_PORT = 1883
-    GPX_FILE_PATH = project_root / "shared" / "tracks" / "home-stadium.gpx"
-
-    # Check if GPX file exists
-    if not GPX_FILE_PATH.exists():
-        logger.error(f"GPX file not found: {GPX_FILE_PATH}")
-        sys.exit(1)
 
     try:
         logger.info("🚗 Starting Vehicle Emulator...")
 
-        mqtt_service = MQTTService(
-            broker_host=MQTT_BROKER_HOST,
-            broker_port=MQTT_BROKER_PORT,
-            client_id=f"{VEHICLE_ID}_emulator",
-        )
-        mqtt_service.connect()
-        time.sleep(1)  # Wait for connection
+        vehicles = [
+            {"id": "vehicle_01", "gpx": "shared/tracks/home-stadium.gpx"},
+            {"id": "vehicle_02", "gpx": "shared/tracks/web-dief.gpx"},
+            {"id": "vehicle_03", "gpx": "shared/tracks/kokoro-iport.gpx"},
+        ]
 
-        if not mqtt_service.is_connected:
-            logger.error("Failed to connect to MQTT broker")
-            sys.exit(1)
+        vehicles_instances = []
+        for v in vehicles:
 
-        logger.info("✅ Connected to MQTT broker")
+            if not Path(v["gpx"]).is_file():
+                logger.error(f"GPX file not found: {v['gpx']}")
+                continue
 
-        vehicle = ElectricVehicle(
-            vehicle_id=VEHICLE_ID,
-            mqtt_service=mqtt_service,
-            gpx_file_name=str(GPX_FILE_PATH),
-        )
+            # Create individual MQTT connection for each vehicle
+            vehicle_mqtt = MQTTService(
+                broker_host=MQTT_BROKER_HOST,
+                broker_port=MQTT_BROKER_PORT,
+                client_id=f"{v['id']}_emulator",
+            )
+            vehicle_mqtt.connect()
+            time.sleep(0.5)  # Brief wait for connection
 
-        vehicle.start()
-        logger.info(f"🚗 Vehicle {VEHICLE_ID} started and publishing telemetry")
+            if not vehicle_mqtt.is_connected:
+                logger.error(f"Failed to connect MQTT for vehicle {v['id']}")
+                continue
+
+            vehicle = ElectricVehicle(
+                vehicle_id=v["id"],
+                mqtt_service=vehicle_mqtt,
+                gpx_file_name=str(v["gpx"]),
+            )
+            vehicles_instances.append((vehicle, vehicle_mqtt))
+
+            vehicle.start()
+            logger.info(f"🚗 Vehicle {v['id']} started with dedicated MQTT connection")
 
         def signal_handler(signum, frame):
-            logger.info("🛑 Received shutdown signal, stopping vehicle...")
-            vehicle.stop()
-            mqtt_service.disconnect()
-            logger.info("✅ Vehicle emulator stopped")
+            logger.info("🛑 Received shutdown signal, stopping vehicles...")
+            for vehicle, mqtt_service in vehicles_instances:
+                vehicle.stop()
+                mqtt_service.disconnect()
+            logger.info("✅ All vehicles stopped")
             sys.exit(0)
 
         signal.signal(signal.SIGINT, signal_handler)
@@ -77,10 +84,10 @@ def main():
         sys.exit(1)
     finally:
         try:
-            if "vehicle" in locals():
+            for vehicle, mqtt_service in vehicles_instances:
                 vehicle.stop()
-            if "mqtt_service" in locals():
                 mqtt_service.disconnect()
+            logger.info("✅ All vehicles stopped")
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
 
