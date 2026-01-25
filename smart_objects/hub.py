@@ -31,7 +31,7 @@ class Hub(SmartObject):
         hub_id: str,
         mqtt_service: MQTTService,
         location: GeoLocation,
-        max_grid_capacity_kw: float = 100.0,
+        max_grid_capacity_kw: float = 140.0,
         ip_address: str = "0.0.0.0",
         firmware_version: str = "1.0.0",
         dlm_policy: Optional[IPolicy] = None,
@@ -239,7 +239,9 @@ class Hub(SmartObject):
 
         for _, node_resource in self.resource_map.items():
             if isinstance(node_resource, Node):
-                node_resource.power_limit_kw = round(node_resource.max_power_kw / len(self.resource_map), 2)
+                node_resource.power_limit_kw = round(
+                    self.max_grid_capacity_kw / len(self.resource_map), 2
+                )
                 node_resource.notify_update(message_type="info")
                 node_resource.notify_update(message_type="status")
 
