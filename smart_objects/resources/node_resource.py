@@ -38,13 +38,15 @@ class Node(SmartObjectResource):
         mqtt_service: Optional[MQTTService] = None,
         max_power_kw: float = 22.0,
         simulation: bool = True,
-        serial_port: str = "COM3"
+        serial_port: str = "COM3",
     ):
         super().__init__(resource_id=node_id)
         self.node_id = node_id
         self.hub_id = hub_id
         self.mqtt_service = mqtt_service
         self.max_power_kw = max_power_kw
+
+        self.simulation = simulation
 
         self.bridge = None
         if not simulation:
@@ -54,12 +56,16 @@ class Node(SmartObjectResource):
                 self.bridge.connect()
                 self.logger.info(f"Bridge initialized on {serial_port}")
             except Exception as e:
-                self.logger.error(f"Failed to init bridge: {e}. Fallback to simulation.")
+                self.logger.error(
+                    f"Failed to init bridge: {e}. Fallback to simulation."
+                )
                 simulation = True
 
         self.power_sensor = INA219Sensor(bridge=self.bridge, simulation=simulation)
         self.distance_sensor = HC_SR04(bridge=self.bridge, simulation=simulation)
-        self.charging_actuator = L298NActuator(bridge=self.bridge, simulation=simulation)
+        self.charging_actuator = L298NActuator(
+            bridge=self.bridge, simulation=simulation
+        )
 
         self.current_state: ChargingState = ChargingState.IDLE
         self.error_code: int = 0
@@ -122,7 +128,6 @@ class Node(SmartObjectResource):
         self.power_limit_kw = limit_kw
 
         if self.current_state == ChargingState.CHARGING:
-            # Calculate PWM level based on power limit
             pwm_ratio = min(limit_kw / self.max_power_kw, 1.0)
             pwm_level = pwm_ratio * 255.0
 
@@ -139,7 +144,8 @@ class Node(SmartObjectResource):
         self.distance_sensor.measure()
         distance = self.distance_sensor.get_value("distance")
 
-        self.is_occupied = distance < self.VEHICLE_DETECTION_THRESHOLD
+        if not self.simulation:
+            self.is_occupied = distance < self.VEHICLE_DETECTION_THRESHOLD
 
         power_w = self.power_sensor.get_value("power")
         self.logger.debug(
@@ -232,10 +238,16 @@ class Node(SmartObjectResource):
                 if telemetry.battery_level is not None:
                     self.current_vehicle_soc = telemetry.battery_level
 
-                if not telemetry.is_charging:
+                if (
+                    not telemetry.is_charging
+                    and self.is_occupied
+                    and self.current_state == ChargingState.CHARGING
+                ):
                     self.set_state(ChargingState.FULL)
+                    if self.simulation:
+                        self.is_occupied = False
 
-                self.logger.info(
+                self.logger.debug(
                     f"📊 Received telemetry from vehicle {vehicle_id}: "
                     f"SoC={telemetry.battery_level}%"
                 )
