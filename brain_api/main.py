@@ -18,6 +18,7 @@ from .api import (
     health,
     hubs,
     nodes,
+    qr_code,
     recommendations,
     sessions,
     vehicles,
@@ -170,6 +171,7 @@ app.include_router(dlm.router, tags=["Dynamic Load Management"])
 app.include_router(charging_request.router, tags=["Charging Requests"])
 app.include_router(recommendations.router, tags=["Recommendations"])
 app.include_router(ws_telemetry.router, tags=["WebSocket Telemetry"])
+app.include_router(qr_code.router, tags=["QR Codes"])
 
 
 @app.get("/", summary="Root Endpoint", description="Get basic API information")
