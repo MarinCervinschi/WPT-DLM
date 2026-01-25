@@ -9,7 +9,16 @@ from shared.policies import PriorityPolicy
 from shared.services.mqtt_service import MQTTService
 from smart_objects.hub import Hub
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+
 logger = logging.getLogger("DLM_Gateway_Hub")
+
+logging.getLogger("iot:actuator:l298n").setLevel(logging.DEBUG)
 
 
 @asynccontextmanager
@@ -46,7 +55,12 @@ async def lifespan(app: FastAPI):
         dlm_policy=PriorityPolicy(max_grid_capacity_kw=MAX_GRID_CAPACITY_KW),
     )
 
-    hub.add_node(node_id="hw_node", max_power_kw=78.0, simulation=False)
+    hub.add_node(
+        node_id="hw_node",
+        max_power_kw=78.0,
+        simulation=False,
+        serial_port="COM7",
+    )
     hub.add_node(node_id="node_02", max_power_kw=78.0, simulation=True)
     hub.add_node(node_id="node_03", max_power_kw=78.0, simulation=True)
 

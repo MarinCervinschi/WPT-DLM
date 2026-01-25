@@ -4,6 +4,7 @@ import time
 from typing import Optional, Tuple
 
 import serial
+from serial import SerialException
 
 
 class ArduinoSerialBridge:
@@ -24,8 +25,9 @@ class ArduinoSerialBridge:
                 self.serial.reset_input_buffer()
 
             self.logger.info(f"✅ Arduino connected on {self.port}")
-        except serial.SerialException as e:
-            self.logger.error(f"❌ Failed to connect to Arduino: {e}")
+        except SerialException as e:
+            self.logger.error(f"❌ Failed to connect to Arduino on {self.port}: {e}")
+            raise  # Re-raise the exception so Node can detect the failure
 
     def disconnect(self):
         with self._serial_lock:
