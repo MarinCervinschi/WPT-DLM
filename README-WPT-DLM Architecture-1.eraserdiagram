@@ -1,5 +1,6 @@
 cloud-architecture-diagram
 
+
 // Wireless Power Transfer - Dynamic Load Management
 title WPT-DLM Architecture
 
@@ -36,7 +37,6 @@ Mobile App [icon: smartphone, color: orange] {
 Electric vehicle [icon: car, color: red] {
   Position [icon: map-pin]
   Battery [icon: battery]
-  CarPlay [icon: airplay]
 }
 
 // Connections
@@ -56,3 +56,4 @@ Electric vehicle > Central Cloud: send telemetry
 
 
 Mobile App > Electric vehicle: connected to
+

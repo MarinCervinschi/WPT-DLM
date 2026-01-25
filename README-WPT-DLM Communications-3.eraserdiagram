@@ -1,5 +1,6 @@
 cloud-architecture-diagram
 
+
 // Wireless Power Transfer - Dynamic Load Management
 title WPT-DLM Communications
 
@@ -37,7 +38,7 @@ Electric vehicle [icon: car, color: red] {
   CarPlay [icon: airplay]
 }
 
-CSMS > Central Cloud: MQTT [color: orange]
+CSMS <> Central Cloud: MQTT [color: orange]
 
 Electric vehicle > Central Cloud: MQTT [color: orange]
 

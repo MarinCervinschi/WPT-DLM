@@ -1,5 +1,6 @@
 cloud-architecture-diagram
 
+
 title Level 2&3 - Cloud
 
 Central Cloud [color: blue, icon: cloud] {
@@ -30,5 +31,9 @@ Machine Learning > API
 
 PostgresSQL > Grafana
 
+API > MQTT Broker: publish vehicle requests
+
+API > InfluxDB
 API > PostgresSQL
 PostgresSQL > Machine Learning: get traning data
+
