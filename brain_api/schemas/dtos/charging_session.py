@@ -11,7 +11,7 @@ class ChargingSessionBase(BaseModel):
 
     node_id: str = Field(..., min_length=1, max_length=50, description="Node ID")
     vehicle_id: Optional[str] = Field(
-        None, max_length=50, description="Vehicle ID (optional)"
+        ..., max_length=50, description="Vehicle ID (optional)"
     )
 
 
@@ -28,7 +28,7 @@ class ChargingSessionStart(BaseModel):
     """Schema for starting a charging session."""
 
     node_id: str = Field(..., min_length=1, max_length=50, description="Node ID")
-    vehicle_id: Optional[str] = Field(None, max_length=50, description="Vehicle ID")
+    vehicle_id: Optional[str] = Field(..., max_length=50, description="Vehicle ID")
 
 
 # ==================== Update Schema ====================
