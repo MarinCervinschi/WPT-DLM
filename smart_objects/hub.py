@@ -239,6 +239,7 @@ class Hub(SmartObject):
 
         for _, node_resource in self.resource_map.items():
             if isinstance(node_resource, Node):
+                node_resource.power_limit_kw = round(node_resource.max_power_kw / len(self.resource_map), 2)
                 node_resource.notify_update(message_type="info")
                 node_resource.notify_update(message_type="status")
 

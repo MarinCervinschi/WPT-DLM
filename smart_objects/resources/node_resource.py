@@ -35,7 +35,7 @@ class Node(SmartObjectResource):
         node_id: str,
         hub_id: str,
         mqtt_service: Optional[MQTTService] = None,
-        max_power_kw: float = 22.0,
+        max_power_kw: float = 78.0,
         simulation: bool = True,
         serial_port: str = "COM3",
     ):
@@ -69,7 +69,7 @@ class Node(SmartObjectResource):
         self.current_state: ChargingState = ChargingState.IDLE
         self.error_code: int = 0
 
-        self.power_limit_kw: float = max_power_kw
+        self.power_limit_kw: float = 0.0
         self.is_occupied: bool = False
         self.connected_vehicle_id: Optional[str] = None
         self.current_vehicle_soc: Optional[int] = None
