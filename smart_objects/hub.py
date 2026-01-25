@@ -31,7 +31,7 @@ class Hub(SmartObject):
         hub_id: str,
         mqtt_service: MQTTService,
         location: GeoLocation,
-        max_grid_capacity_kw: float = 140.0,
+        max_grid_capacity_kw: float = 200.0,
         ip_address: str = "0.0.0.0",
         firmware_version: str = "1.0.0",
         dlm_policy: Optional[IPolicy] = None,
@@ -67,7 +67,7 @@ class Hub(SmartObject):
     def add_node(
         self, 
         node_id: str, 
-        max_power_kw: float = 22.0, 
+        max_power_kw: float = 110.0, 
         simulation: bool = True,
         serial_port: str = "COM7"
     ) -> Node:

@@ -31,6 +31,9 @@ class VehicleEngineResource(SmartObjectResource):
     MIN_BATTERY_CONSUMPTION: ClassVar[float] = 0.1
     MAX_BATTERY_CONSUMPTION: ClassVar[float] = 0.5
 
+    MAX_NODE_POWER_KW: ClassVar[float] = 110.0  # our INA219 max power in W * 100
+    BASE_CHARGING_RATE: ClassVar[float] = 0.5  # Base % increase per second
+
     def __init__(
         self,
         resource_id: str,
@@ -167,8 +170,8 @@ class VehicleEngineResource(SmartObjectResource):
     def _apply_charging(self) -> None:
         """Apply charging using power from node telemetry."""
         if self._current_charging_power_kw > 0:
-            base_rate = 0.5  # Base % increase per second
-            power_factor = self._current_charging_power_kw / 78  # INA219 max power
+            base_rate = self.BASE_CHARGING_RATE  # Base % increase per second
+            power_factor = self._current_charging_power_kw / self.MAX_NODE_POWER_KW
             charge_rate_per_second = base_rate * power_factor
 
             self.battery_level = min(100.0, self.battery_level + charge_rate_per_second)

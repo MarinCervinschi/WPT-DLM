@@ -30,9 +30,9 @@ class INA219Sensor(Sensor):
                 "power": self.UNIT_POWER,
             },
             ranges={
-                "voltage": (0.0, 26.0),
-                "current": (0.0, 3.2),
-                "power": (0.0, 78.4),
+                "voltage": (0.0, 11.0),
+                "current": (0.0, 0.1),
+                "power": (0.0, 1.1),
             },
             timestamp=0,
         )
@@ -42,8 +42,8 @@ class INA219Sensor(Sensor):
 
     def measure(self) -> None:
         if self.simulation:
-            voltage = random.uniform(0.0, 26.0)
-            current = random.uniform(0.0, 3.2)
+            voltage = random.uniform(0.0, 11.0)
+            current = random.uniform(0.0, 0.1)
             self.simulate_measurement(voltage, current)
         else:
             if self.bridge:

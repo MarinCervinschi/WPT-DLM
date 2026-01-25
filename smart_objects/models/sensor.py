@@ -47,4 +47,5 @@ class Sensor(ABC):
         Returns:
             The measurement value
         """
-        return self.values[measurement]
+        a = 1 if measurement != "power" else 100
+        return self.values[measurement] * a

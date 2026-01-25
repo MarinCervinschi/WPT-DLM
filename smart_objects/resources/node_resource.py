@@ -35,7 +35,7 @@ class Node(SmartObjectResource):
         node_id: str,
         hub_id: str,
         mqtt_service: Optional[MQTTService] = None,
-        max_power_kw: float = 78.0,
+        max_power_kw: float = 110.0,
         simulation: bool = True,
         serial_port: str = "COM7",
     ):
