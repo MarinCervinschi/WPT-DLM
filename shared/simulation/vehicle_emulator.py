@@ -28,8 +28,8 @@ def main():
 
         vehicles = [
             {"id": "vehicle_01", "gpx": "shared/tracks/home-stadium.gpx"},
-            {"id": "vehicle_02", "gpx": "shared/tracks/web-dief.gpx"},
-            {"id": "vehicle_03", "gpx": "shared/tracks/kokoro-iport.gpx"},
+            {"id": "el_taxi", "gpx": "shared/tracks/web-dief.gpx"},
+           # {"id": "vehicle_03", "gpx": "shared/tracks/kokoro-iport.gpx"},
         ]
 
         vehicles_instances = []
