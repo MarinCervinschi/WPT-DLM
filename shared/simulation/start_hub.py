@@ -1,16 +1,16 @@
-import time
 import sys
+import time
 from pathlib import Path
 
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from shared.mqtt_dtos import GeoLocation
-from shared.services.mqtt_service import MQTTService
-from shared.policies import PriorityPolicy
-from smart_objects.hub import Hub
-
 import logging
+
+from shared.mqtt_dtos import GeoLocation
+from shared.policies import PriorityPolicy
+from shared.services.mqtt_service import MQTTService
+from smart_objects.hub import Hub
 
 logging.basicConfig(
     level=logging.INFO,  # Set root to INFO to reduce noise

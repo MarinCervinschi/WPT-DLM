@@ -9,7 +9,7 @@ from shared.mqtt_dtos import (
     HubStatus,
 )
 from shared.mqtt_dtos.vehicle_dto import VehicleRequest
-from shared.policies import IPolicy, EqualSharingPolicy, PowerAllocation
+from shared.policies import EqualSharingPolicy, IPolicy, PowerAllocation
 from shared.services import DLMService, MQTTService
 from smart_objects.resources import Node, SmartObject
 
@@ -214,7 +214,7 @@ class Hub(SmartObject):
                         f"Node {request.node_id} has no vehicle connected for assignment"
                     )
             else:
-                node.is_occupied = True 
+                node.is_occupied = True
 
             node.set_state(ChargingState.CHARGING)
 

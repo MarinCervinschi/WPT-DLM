@@ -17,7 +17,7 @@ def get_recommendation(
 ) -> RecommendationResponse:
     """
     Get a charging station recommendation based on vehicle position and battery level.
-    
+
     The recommendation algorithm considers:
     - Distance from vehicle to charging stations
     - Available charging power at nodes
@@ -26,19 +26,19 @@ def get_recommendation(
     """
     try:
         recommendation = service.get_recommendation(request)
-        
+
         if not recommendation:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No available charging stations found"
+                detail="No available charging stations found",
             )
-        
+
         return recommendation
-        
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate recommendation: {str(e)}"
+            detail=f"Failed to generate recommendation: {str(e)}",
         )

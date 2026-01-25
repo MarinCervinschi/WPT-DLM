@@ -7,8 +7,8 @@ from shared.services import MQTTService
 
 from .smart_object_resource import (
     MessageType,
-    SmartObjectResource,
     ResourceDataListener,
+    SmartObjectResource,
 )
 
 

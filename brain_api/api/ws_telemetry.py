@@ -1,5 +1,6 @@
 import json
 import logging
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from ..core.websocket_manager import ws_manager
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 async def telemetry_websocket(websocket: WebSocket, vehicle_id: str):
     """
     WebSocket endpoint for receiving real-time telemetry data for a specific vehicle.
-    
+
     Args:
         websocket: WebSocket connection
         vehicle_id: ID of the vehicle to receive telemetry for

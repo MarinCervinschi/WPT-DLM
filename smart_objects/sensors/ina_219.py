@@ -14,7 +14,9 @@ class INA219Sensor(Sensor):
     DATA_TYPE = float
     MEASUREMENT_PRECISION = 3
 
-    def __init__(self, bridge: Optional[ArduinoSerialBridge] = None, simulation: bool = False):
+    def __init__(
+        self, bridge: Optional[ArduinoSerialBridge] = None, simulation: bool = False
+    ):
         super().__init__(
             type=self.RESOURCE_TYPE,
             values={
@@ -51,7 +53,7 @@ class INA219Sensor(Sensor):
                     self.timestamp = int(time.time() * 1000)
                 except Exception as e:
                     raise RuntimeError(f"Failed to read power data from INA219: {e}")
-                
+
     def simulate_measurement(self, voltage: float, current: float) -> None:
         power = voltage * current
 

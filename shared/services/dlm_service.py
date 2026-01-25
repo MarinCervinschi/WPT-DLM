@@ -5,6 +5,7 @@ from typing import Callable, Dict, List, Optional
 
 from shared.mqtt_dtos import DLMNotification, VehicleRequest
 from shared.policies import IPolicy, PowerAllocation
+
 from .mqtt_service import MQTTService
 
 

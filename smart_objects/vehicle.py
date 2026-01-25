@@ -1,10 +1,10 @@
 import json
 from typing import Optional
 
-from shared.services import MQTTService
 from shared.mqtt_dtos import GeoLocation, VehicleRequest
-from smart_objects.resources import SmartObject, VehicleEngineResource
+from shared.services import MQTTService
 from shared.simulation import ChargingRequestEmulator
+from smart_objects.resources import SmartObject, VehicleEngineResource
 
 
 class ElectricVehicle(SmartObject):

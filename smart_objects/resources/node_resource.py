@@ -2,13 +2,12 @@ import json
 import threading
 from typing import ClassVar, Optional
 
-
-from shared.mqtt_dtos import NodeInfo, NodeStatus, NodeTelemetry, ChargingState
+from edge.gateway import ArduinoSerialBridge
+from shared.mqtt_dtos import ChargingState, NodeInfo, NodeStatus, NodeTelemetry
 from shared.mqtt_dtos.vehicle_dto import VehicleTelemetry
 from shared.services import MQTTService
 from smart_objects.actuators import L298NActuator
-from smart_objects.sensors import INA219Sensor, HC_SR04
-from edge.gateway import ArduinoSerialBridge
+from smart_objects.sensors import HC_SR04, INA219Sensor
 
 from .smart_object_resource import SmartObjectResource
 

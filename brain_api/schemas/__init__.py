@@ -23,7 +23,6 @@ from .dtos.dlm_event import (
     DLMEventStats,
     DLMTriggerReason,
 )
-from .dtos.recommendation import RecommendationRequest, RecommendationResponse
 
 # DTOs
 from .dtos.hub import (
@@ -42,6 +41,7 @@ from .dtos.node import (
     NodeResponse,
     NodeUpdate,
 )
+from .dtos.recommendation import RecommendationRequest, RecommendationResponse
 from .dtos.vehicle import (
     VehicleBase,
     VehicleCreate,

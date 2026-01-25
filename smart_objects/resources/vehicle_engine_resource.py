@@ -1,18 +1,21 @@
+import json
 import random
 import threading
 import time
-import json
-from typing import List, Optional, ClassVar
+from typing import ClassVar, List, Optional
+
 import gpxpy
-from .smart_object_resource import SmartObjectResource
+
 from shared.mqtt_dtos import (
-    VehicleTelemetry,
+    ChargingState,
     GeoLocation,
     NodeStatus,
     NodeTelemetry,
-    ChargingState,
+    VehicleTelemetry,
 )
 from shared.services import MQTTService
+
+from .smart_object_resource import SmartObjectResource
 
 
 class VehicleEngineResource(SmartObjectResource):

@@ -1,6 +1,6 @@
 import logging
 import math
-from typing import Optional, List
+from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -57,7 +57,7 @@ class RecommendationService:
                 continue
 
             node_ids: List[str] = [node.node_id for node in nodes]  # type: ignore
-            nodes_state = self.influx_service.get_nodes_current_state(node_ids) 
+            nodes_state = self.influx_service.get_nodes_current_state(node_ids)
 
             for node in nodes:
                 is_occupied = False

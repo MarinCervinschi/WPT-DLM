@@ -1,12 +1,13 @@
 import logging
 import random
 import threading
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 import requests
 
+from brain_api.schemas.dtos.recommendation import RecommendationRequest
 from shared.mqtt_dtos import GeoLocation, VehicleRequest
 from shared.services import MQTTService
-from brain_api.schemas.dtos.recommendation import RecommendationRequest
 
 
 class ChargingRequestEmulator:

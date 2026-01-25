@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+
+from brain_api.api.dependencies import get_db, get_mqtt_service
 from brain_api.schemas import ChargingRequestCreate, ChargingRequestResponse
 from brain_api.services import ChargingRequestService
-from brain_api.api.dependencies import get_db, get_mqtt_service
 
 router = APIRouter()
 
@@ -13,7 +14,6 @@ router = APIRouter()
     summary="Request charging session",
     description="Initiates a charging session request by publishing to MQTT topic",
 )
-
 async def request_charging(
     node_id: str,
     request_data: ChargingRequestCreate,
@@ -22,7 +22,7 @@ async def request_charging(
 ):
     """
     Request a charging session for a vehicle at a specific node.
-    
+
     The QR code scan provides the node ID, and the app provides the vehicle ID.
     This publishes a message to the MQTT topic for the hub to process.
     """

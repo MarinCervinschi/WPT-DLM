@@ -20,6 +20,7 @@ DBSession = Annotated[Session, Depends(get_db)]
 _mqtt_service = None
 _influx_service = None
 
+
 def get_mqtt_service():
     """Dependency that provides MQTT service instance."""
     global _mqtt_service
