@@ -23,6 +23,9 @@ class DLMNotification(BaseModel):
     total_grid_load: float = Field(
         ..., ge=0, description="Total grid load at trigger time in kW"
     )
+    available_capacity: float = Field(
+        ..., description="Available grid capacity at trigger time in kW"
+    )
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         description="Event timestamp",

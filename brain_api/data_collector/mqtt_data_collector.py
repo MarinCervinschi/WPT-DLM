@@ -29,8 +29,6 @@ from ..services.influxdb_service import InfluxDBService
 if TYPE_CHECKING:
     from shared.services.mqtt_service import MQTTService
 
-logger = logging.getLogger(__name__)
-
 
 class MQTTDataCollector:
     """
@@ -58,10 +56,11 @@ class MQTTDataCollector:
         self.node_service = NodeService(db)
         self.influx_service = InfluxDBService()
 
+        self.logger = logging.getLogger("MQTTDataCollector")
+
     def subscribe(self) -> None:
         """Start subscribing to MQTT topics."""
-        logger.info("Starting MQTT Data Collector...")
-
+        self.logger.info("Starting MQTT Data Collector...")
         self.mqtt_service.subscribe("iot/hubs/+/info", self._on_hub_info, qos=1)
         self.mqtt_service.subscribe("iot/hubs/+/status", self._on_hub_status, qos=1)
         self.mqtt_service.subscribe(
@@ -72,7 +71,7 @@ class MQTTDataCollector:
         )
         self.mqtt_service.subscribe("iot/hubs/+/dlm/events", self._on_dlm_event, qos=1)
 
-        logger.info("MQTT Data Collector started successfully")
+        self.logger.info("MQTT Data Collector started successfully")
 
     def _on_hub_info(self, msg) -> None:
         """
@@ -83,7 +82,7 @@ class MQTTDataCollector:
         try:
             topic_parts = msg.topic.split("/")
             if len(topic_parts) != 4:
-                logger.warning(f"Invalid hub info topic: {msg.topic}")
+                self.logger.warning(f"Invalid hub info topic: {msg.topic}")
                 return
 
             hub_id = topic_parts[2]
@@ -103,7 +102,7 @@ class MQTTDataCollector:
                     firmware_version=hub_info.firmware_version,
                 )
                 self.hub_service.update(hub_id, update_data)
-                logger.info(f"Updated hub {hub_id} info")
+                self.logger.info(f"Updated hub {hub_id} info")
             else:
                 create_data = HubCreate(
                     hub_id=hub_id,
@@ -116,10 +115,10 @@ class MQTTDataCollector:
                     is_active=True,
                 )
                 self.hub_service.create(create_data)
-                logger.info(f"Created new hub {hub_id}")
+                self.logger.info(f"Created new hub {hub_id}")
 
         except Exception as e:
-            logger.error(f"Error processing hub info message: {e}", exc_info=True)
+            self.logger.error(f"Error processing hub info message: {e}", exc_info=True)
 
     def _on_hub_status(self, msg) -> None:
         """
@@ -130,7 +129,7 @@ class MQTTDataCollector:
         try:
             topic_parts = msg.topic.split("/")
             if len(topic_parts) != 4:
-                logger.warning(f"Invalid hub status topic: {msg.topic}")
+                self.logger.warning(f"Invalid hub status topic: {msg.topic}")
                 return
 
             hub_id = topic_parts[2]
@@ -145,10 +144,12 @@ class MQTTDataCollector:
             elif hub_status.state == ConnectionState.OFFLINE:
                 self.hub_service.deactivate(hub_id)
 
-            logger.debug(f"Updated hub {hub_id} status: {hub_status.state.value}")
+            self.logger.debug(f"Updated hub {hub_id} status: {hub_status.state.value}")
 
         except Exception as e:
-            logger.error(f"Error processing hub status message: {e}", exc_info=True)
+            self.logger.error(
+                f"Error processing hub status message: {e}", exc_info=True
+            )
 
     def _on_node_info(self, msg) -> None:
         """
@@ -159,7 +160,7 @@ class MQTTDataCollector:
         try:
             topic_parts = msg.topic.split("/")
             if len(topic_parts) != 6:
-                logger.warning(f"Invalid node info topic: {msg.topic}")
+                self.logger.warning(f"Invalid node info topic: {msg.topic}")
                 return
 
             hub_id = topic_parts[2]
@@ -176,7 +177,7 @@ class MQTTDataCollector:
                     max_power_kw=node_info.max_power_kw,
                 )
                 self.node_service.update(node_id, update_data)
-                logger.info(f"Updated node {node_id} info for hub {hub_id}")
+                self.logger.info(f"Updated node {node_id} info for hub {hub_id}")
             else:
                 create_data = NodeCreate(
                     node_id=node_id,
@@ -185,10 +186,10 @@ class MQTTDataCollector:
                     is_maintenance=False,
                 )
                 self.node_service.create(create_data)
-                logger.info(f"Created new node {node_id} for hub {hub_id}")
+                self.logger.info(f"Created new node {node_id} for hub {hub_id}")
 
         except Exception as e:
-            logger.error(f"Error processing node info message: {e}", exc_info=True)
+            self.logger.error(f"Error processing node info message: {e}", exc_info=True)
 
     def _on_node_status(self, msg) -> None:
         """
@@ -203,19 +204,23 @@ class MQTTDataCollector:
         try:
             topic_parts = msg.topic.split("/")
             if len(topic_parts) != 6:
-                logger.warning(f"Invalid node status topic: {msg.topic}")
+                self.logger.warning(f"Invalid node status topic: {msg.topic}")
                 return
 
             node_id = topic_parts[4]
             payload = json.loads(msg.payload.decode())
 
             node_status = NodeStatus(**payload)
+            import time
+            time.sleep(1)  # slight delay to ensure telemetry data is available
 
             self._manage_charging_session(node_id, node_status.state)
-            logger.debug(f"Updated node {node_id} status: {node_status.state}")
+            self.logger.debug(f"Updated node {node_id} status: {node_status.state}")
 
         except Exception as e:
-            logger.error(f"Error processing node status message: {e}", exc_info=True)
+            self.logger.error(
+                f"Error processing node status message: {e}", exc_info=True
+            )
 
     def _manage_charging_session(self, node_id: str, state: ChargingState) -> None:
         """
@@ -230,10 +235,21 @@ class MQTTDataCollector:
 
         if state == ChargingState.CHARGING:
             if not has_active_session:
-                start_data = ChargingSessionStart(node_id=node_id, vehicle_id=None)
+                node_telemetry = self.influx_service.get_latest_node_telemetry(
+                    node_id=node_id
+                )
+
+                self.logger.info(f"Node telemetry for session start: {node_telemetry}")
+                vehicle_id = None
+                if node_telemetry and node_telemetry.get("is_occupied"):
+                    vehicle_id = node_telemetry.get("connected_vehicle_id")
+
+                start_data = ChargingSessionStart(
+                    node_id=node_id, vehicle_id=vehicle_id
+                )
                 session = self.session_service.start(start_data)
-                logger.info(
-                    f"Started charging session {session.charging_session_id} for node {node_id}"
+                self.logger.info(
+                    f"Started charging session {session.charging_session_id} for node {node_id} and vehicle {vehicle_id}"
                 )
         else:
             if has_active_session:
@@ -249,7 +265,7 @@ class MQTTDataCollector:
                         avg_power_kw=metrics["avg_power_kw"],
                     )
                     self.session_service.end(session.charging_session_id, end_data)
-                    logger.info(
+                    self.logger.info(
                         f"Ended charging session {session.charging_session_id} for node {node_id} "
                         f"(state changed to {state.value}): "
                         f"{metrics['total_energy_kwh']:.2f} kWh, {metrics['avg_power_kw']:.2f} kW avg"
@@ -264,7 +280,7 @@ class MQTTDataCollector:
         try:
             topic_parts = msg.topic.split("/")
             if len(topic_parts) != 5:
-                logger.warning(f"Invalid DLM event topic: {msg.topic}")
+                self.logger.warning(f"Invalid DLM event topic: {msg.topic}")
                 return
 
             hub_id = topic_parts[2]
@@ -279,21 +295,21 @@ class MQTTDataCollector:
                 original_limit_kw=dlm_event.original_limit,
                 new_limit_kw=dlm_event.new_limit,
                 total_grid_load_kw=dlm_event.total_grid_load,
-                available_capacity_at_trigger=None,
+                available_capacity_at_trigger=dlm_event.available_capacity,
             )
 
             self.dlm_service.log(log_data)
-            logger.info(
+            self.logger.info(
                 f"Recorded DLM event for node {dlm_event.affected_node_id}: "
                 f"{dlm_event.trigger_reason} ({dlm_event.original_limit} -> {dlm_event.new_limit} kW)"
             )
 
         except Exception as e:
-            logger.error(f"Error processing DLM event message: {e}", exc_info=True)
+            self.logger.error(f"Error processing DLM event message: {e}", exc_info=True)
 
     def unsubscribe(self) -> None:
         """Stop data collector and unsubscribe from topics."""
-        logger.info("Stopping MQTT Data Collector...")
+        self.logger.info("Stopping MQTT Data Collector...")
 
         self.mqtt_service.unsubscribe("iot/hubs/+/info")
         self.mqtt_service.unsubscribe("iot/hubs/+/status")
@@ -303,4 +319,4 @@ class MQTTDataCollector:
 
         self.influx_service.close()
 
-        logger.info("MQTT Data Collector stopped")
+        self.logger.info("MQTT Data Collector stopped")

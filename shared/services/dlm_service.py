@@ -140,15 +140,19 @@ class DLMService:
 
             self._apply_allocation_callback(alloc)
 
+            total_grid_load = sum(
+                nodes_state[n]["current_power_kw"] for n in nodes_state
+            )
+            available_capacity = self.policy.max_grid_capacity_kw - total_grid_load
+
             if old_limit is None or abs(old_limit - new_limit) > 1.5:
                 self._publish_dlm_notification(
                     node_id=alloc.node_id,
                     old_limit=old_limit or new_limit,
                     new_limit=new_limit,
                     reason=alloc.reason,
-                    total_grid_load=sum(
-                        nodes_state[n]["current_power_kw"] for n in nodes_state
-                    ),
+                    total_grid_load=total_grid_load,
+                    available_capacity=available_capacity,
                 )
 
                 self._current_allocations[alloc.node_id] = new_limit
@@ -162,6 +166,7 @@ class DLMService:
         new_limit: float,
         reason: str,
         total_grid_load: float,
+        available_capacity: float,
     ) -> None:
         """
         Publish DLM event notification.
@@ -179,6 +184,7 @@ class DLMService:
             new_limit=new_limit,
             affected_node_id=node_id,
             total_grid_load=total_grid_load,
+            available_capacity=available_capacity,
         )
 
         topic = f"iot/hubs/{self.hub_id}/dlm/events"
