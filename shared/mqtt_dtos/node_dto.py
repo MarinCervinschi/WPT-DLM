@@ -66,3 +66,7 @@ class NodeTelemetry(BaseModel):
         if "power_limit_kw" in info.data and v > info.data["power_limit_kw"]:
             raise ValueError("power_kw cannot exceed power_limit_kw")
         return v
+
+    @field_validator("connected_vehicle_id")
+    def set_default_if_none(cls, v):
+        return v if v is not None else "n/a"

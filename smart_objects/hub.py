@@ -177,10 +177,14 @@ class Hub(SmartObject):
 
         for node_id, resource in self.resource_map.items():
             if isinstance(resource, Node):
+                current_power = (
+                    resource.power_sensor.get_value("power")
+                    if not resource.simulation
+                    else resource.power_limit_kw
+                )
                 nodes_state[node_id] = {
                     "max_power_kw": resource.max_power_kw,
-                    "current_power_kw": resource.power_sensor.get_value("power")
-                    / 1000.0,
+                    "current_power_kw": current_power,
                     "state": resource.current_state.value,
                     "vehicle_id": resource.connected_vehicle_id,
                     "vehicle_soc": resource.current_vehicle_soc,
