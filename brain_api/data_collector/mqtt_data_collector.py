@@ -101,8 +101,11 @@ class MQTTDataCollector:
                     ip_address=hub_info.ip_address,
                     firmware_version=hub_info.firmware_version,
                 )
-                self.hub_service.update(hub_id, update_data)
-                self.logger.info(f"Updated hub {hub_id} info")
+                _, updated = self.hub_service.update_if_changed(hub_id, update_data)
+                if updated:
+                    self.logger.info(f"Updated hub {hub_id} info")
+                else:
+                    self.logger.debug(f"No changes for hub {hub_id} info")
             else:
                 create_data = HubCreate(
                     hub_id=hub_id,
@@ -172,12 +175,14 @@ class MQTTDataCollector:
             existing_node = self.node_service.repo.get(node_id)
 
             if existing_node:
-
                 update_data = NodeUpdate(
                     max_power_kw=node_info.max_power_kw,
                 )
-                self.node_service.update(node_id, update_data)
-                self.logger.info(f"Updated node {node_id} info for hub {hub_id}")
+                _, updated = self.node_service.update_if_changed(node_id, update_data)
+                if updated:
+                    self.logger.info(f"Updated node {node_id} info for hub {hub_id}")
+                else:
+                    self.logger.debug(f"No changes for node {node_id} info")
             else:
                 create_data = NodeCreate(
                     node_id=node_id,

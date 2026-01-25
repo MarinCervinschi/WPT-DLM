@@ -79,6 +79,65 @@ class BaseService(
         self.logger.info(f"Updated {self.repo.model.__name__}: {pk}")
         return self.response_schema.model_validate(entity)
 
+    def has_changes(self, pk: Any, data: UpdateSchemaT) -> bool:
+        """
+        Check if the update data contains changes compared to existing entity.
+
+        Args:
+            pk: Primary key of the entity
+            data: Update data to compare
+
+        Returns:
+            bool: True if there are changes, False if data is identical
+        """
+        try:
+            entity = self.repo.get(pk)
+            if not entity:
+                return True
+
+            update_dict = data.model_dump(exclude_unset=True)
+
+            for field, new_value in update_dict.items():
+                current_value = getattr(entity, field, None)
+
+                if current_value is None and new_value is None:
+                    continue
+
+                if isinstance(current_value, float) and isinstance(new_value, float):
+                    if abs(current_value - new_value) > 1e-9:
+                        return True
+                elif current_value != new_value:
+                    return True
+
+            return False
+
+        except Exception as e:
+            self.logger.warning(f"Error checking changes for {pk}: {e}")
+            return True
+
+    def update_if_changed(
+        self, pk: Any, data: UpdateSchemaT
+    ) -> tuple[ResponseSchemaT, bool]:
+        """
+        Update an entity only if the data has changed.
+
+        Args:
+            pk: Primary key of the entity
+            data: Update data
+
+        Returns:
+            tuple: (ResponseSchemaT, bool) - Updated entity and whether update occurred
+        """
+        if self.has_changes(pk, data):
+            entity = self.update(pk, data)
+            return entity, True
+        else:
+            entity = self.get(pk)
+            self.logger.debug(
+                f"No changes detected for {self.repo.model.__name__}: {pk}"
+            )
+            return entity, False
+
     def delete(self, pk: Any) -> bool:
         """Delete an entity."""
         result = self.repo.delete(pk)
