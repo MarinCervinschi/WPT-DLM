@@ -132,7 +132,8 @@
                         "type": "postgres",
                         "uid": "postgresql"
                     },
-                    "query": "SELECT COUNT(*) AS value FROM hubs WHERE is_active = true",
+                    "format": "table",
+                    "rawSql": "SELECT COUNT(*) AS value FROM hubs WHERE is_active = true",
                     "refId": "A"
                 }
             ],
