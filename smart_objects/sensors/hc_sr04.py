@@ -13,7 +13,9 @@ class HC_SR04(Sensor):
     DATA_TYPE = float
     MEASUREMENT_PRECISION = 2
 
-    def __init__(self, bridge: Optional[ArduinoSerialBridge] = None, simulation: bool = False):
+    def __init__(
+        self, bridge: Optional[ArduinoSerialBridge] = None, simulation: bool = False
+    ):
         super().__init__(
             type=self.RESOURCE_TYPE,
             values={
@@ -32,7 +34,7 @@ class HC_SR04(Sensor):
 
     def measure(self) -> None:
         if self.simulation:
-            distance = random.uniform(2.0, 60.0)
+            distance = random.uniform(2.0, 50.0)
             self.simulate_measurement(distance)
         else:
             if self.bridge:
@@ -42,7 +44,6 @@ class HC_SR04(Sensor):
                     self.timestamp = int(time.time() * 1000)
                 except Exception as e:
                     raise RuntimeError(f"Failed to read distance from HC-SR04: {e}")
-            
 
     def simulate_measurement(self, distance: float) -> None:
         self.values.update(

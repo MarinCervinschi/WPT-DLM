@@ -200,18 +200,21 @@ class Hub(SmartObject):
         Handle vehicle assignment to node.
         Updates node with vehicle info and starts charging.
         """
-        node = self.get_node(request.node_id)
+        node: Node = self.get_node(request.node_id)
         if node:
             node.connected_vehicle_id = request.vehicle_id
             node.current_vehicle_soc = request.soc_percent
 
             node.subscribe_to_vehicle_telemetry(request.vehicle_id)
 
-            node.measure_sensors()
-            if node.is_occupied is False:
-                raise ValueError(
-                    f"Node {request.node_id} has no vehicle connected for assignment"
-                )
+            if not node.simulation:
+                node.measure_sensors()
+                if node.is_occupied is False:
+                    raise ValueError(
+                        f"Node {request.node_id} has no vehicle connected for assignment"
+                    )
+            else:
+                node.is_occupied = True 
 
             node.set_state(ChargingState.CHARGING)
 

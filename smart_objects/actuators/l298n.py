@@ -9,7 +9,9 @@ class L298NActuator(Actuator):
     VALID_STATUSES: ClassVar[List[str]] = ["ON", "OFF"]
     PWM_LEVELS: ClassVar[tuple[int, int]] = (0, 255)
 
-    def __init__(self, bridge: Optional[ArduinoSerialBridge] = None, simulation: bool = False):
+    def __init__(
+        self, bridge: Optional[ArduinoSerialBridge] = None, simulation: bool = False
+    ):
         super().__init__(type=self.RESOURCE_TYPE)
 
         self.state = {
@@ -21,11 +23,17 @@ class L298NActuator(Actuator):
         self.bridge = bridge
 
     def apply_command(self, command: dict) -> None:
-        new_status = command.get("status", self.state["status"])
-        new_pwm_level = command.get("pwm_level", self.state["pwm_level"])
+        new_status = command.get("status")
+        new_pwm_level = command.get("pwm_level")
+
+        if new_status is not None and new_status == self.state["status"]:
+            pass  # No change in status
+
+        if new_pwm_level is not None and new_pwm_level == self.state["pwm_level"]:
+            pass  # No change in pwm_level
 
         if new_status in self.VALID_STATUSES:
-                self.state["status"] = new_status
+            self.state["status"] = new_status
 
         if (
             isinstance(new_pwm_level, (int, float))
@@ -41,8 +49,7 @@ class L298NActuator(Actuator):
             if self.bridge:
                 try:
                     self.bridge.set_l298(
-                        pwm=int(self.state["pwm_level"]), 
-                        status=self.state["status"]
+                        pwm=int(self.state["pwm_level"]), status=self.state["status"]
                     )
                 except Exception as e:
                     raise RuntimeError(f"Failed to set actuator state on L298N: {e}")

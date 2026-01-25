@@ -26,7 +26,7 @@ class VehicleEngineResource(SmartObjectResource):
     MIN_BATTERY_LEVEL: ClassVar[float] = 60.0
     MAX_BATTERY_LEVEL: ClassVar[float] = 90.0
     MIN_BATTERY_CONSUMPTION: ClassVar[float] = 0.1
-    MAX_BATTERY_CONSUMPTION: ClassVar[float] = 1.0
+    MAX_BATTERY_CONSUMPTION: ClassVar[float] = 0.5
 
     def __init__(
         self,
@@ -160,7 +160,7 @@ class VehicleEngineResource(SmartObjectResource):
     def _apply_charging(self) -> None:
         """Apply charging using power from node telemetry."""
         if self._current_charging_power_kw > 0:
-            base_rate = 1.5  # Base % increase per second
+            base_rate = 0.5  # Base % increase per second
             power_factor = self._current_charging_power_kw / 78  # INA219 max power
             charge_rate_per_second = base_rate * power_factor
 
@@ -308,7 +308,7 @@ class VehicleEngineResource(SmartObjectResource):
             )
             self._current_charging_power_kw = new_power_kw
 
-            self.logger.info(f"Telemetry received: {telemetry}")
+            self.logger.debug(f"Telemetry received: {telemetry}")
 
         except Exception as e:
             self.logger.error(f"Error processing node telemetry: {e}")
