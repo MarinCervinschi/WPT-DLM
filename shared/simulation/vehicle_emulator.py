@@ -39,7 +39,6 @@ def main():
                 logger.error(f"GPX file not found: {v['gpx']}")
                 continue
 
-            # Create individual MQTT connection for each vehicle
             vehicle_mqtt = MQTTService(
                 broker_host=MQTT_BROKER_HOST,
                 broker_port=MQTT_BROKER_PORT,

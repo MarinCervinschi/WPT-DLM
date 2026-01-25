@@ -9,11 +9,10 @@ from shared.policies import PriorityPolicy
 from shared.services.mqtt_service import MQTTService
 from smart_objects.hub import Hub
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 logger = logging.getLogger("DLM_Gateway_Hub")
@@ -41,7 +40,7 @@ async def lifespan(app: FastAPI):
         raise RuntimeError("MQTT connection failed")
 
     HUB_ID = "DLM_Gateway_Hub"
-    MAX_GRID_CAPACITY_KW = 140.0
+    MAX_GRID_CAPACITY_KW = 200.0
 
     LOCATION = GeoLocation(latitude=44.62958, longitude=10.94864, altitude=50.0)
 
@@ -57,12 +56,12 @@ async def lifespan(app: FastAPI):
 
     hub.add_node(
         node_id="hw_node",
-        max_power_kw=78.0,
+        max_power_kw=110.0,
         simulation=False,
         serial_port="COM7",
     )
-    hub.add_node(node_id="node_02", max_power_kw=78.0, simulation=True)
-    hub.add_node(node_id="node_03", max_power_kw=78.0, simulation=True)
+    hub.add_node(node_id="node_02", max_power_kw=110.0, simulation=True)
+    hub.add_node(node_id="node_03", max_power_kw=110.0, simulation=True)
 
     hub.start()
 
