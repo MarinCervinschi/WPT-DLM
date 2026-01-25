@@ -40,6 +40,11 @@ class INA219Sensor(Sensor):
         self.simulation = simulation
         self.bridge = bridge
 
+    def _clamp_to_range(self, value: float, value_name: str) -> float:
+        """Clamp a value to its defined range."""
+        min_val, max_val = self.ranges[value_name]
+        return max(min_val, min(max_val, value))
+
     def measure(self) -> None:
         if self.simulation:
             voltage = random.uniform(0.0, 11.0)
@@ -49,6 +54,9 @@ class INA219Sensor(Sensor):
             if self.bridge:
                 try:
                     v, i, p = self.bridge.get_power_data()
+                    v = self._clamp_to_range(v, "voltage")
+                    i = self._clamp_to_range(i, "current")
+                    p = self._clamp_to_range(p, "power")
                     self.values.update(voltage=v, current=i, power=p)
                     self.timestamp = int(time.time() * 1000)
                 except Exception as e:
