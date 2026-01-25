@@ -85,7 +85,7 @@ class ChargingRequestEmulator:
     def _sample_battery_threshold(self) -> int:
         """Sample battery threshold with slight random variation."""
 
-        new_threshold = int(random.uniform(10, 40))
+        new_threshold = int(random.uniform(10, 30))
         self.logger.info(f"New battery threshold set to {new_threshold}%")
         return new_threshold
 

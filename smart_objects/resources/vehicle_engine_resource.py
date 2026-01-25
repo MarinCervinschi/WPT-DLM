@@ -26,10 +26,10 @@ class VehicleEngineResource(SmartObjectResource):
 
     UPDATE_PERIOD: ClassVar[int] = 1  # seconds
 
-    MIN_BATTERY_LEVEL: ClassVar[float] = 60.0
-    MAX_BATTERY_LEVEL: ClassVar[float] = 90.0
+    MIN_BATTERY_LEVEL: ClassVar[float] = 40.0
+    MAX_BATTERY_LEVEL: ClassVar[float] = 50.0
     MIN_BATTERY_CONSUMPTION: ClassVar[float] = 0.1
-    MAX_BATTERY_CONSUMPTION: ClassVar[float] = 0.5
+    MAX_BATTERY_CONSUMPTION: ClassVar[float] = 0.8
 
     MAX_NODE_POWER_KW: ClassVar[float] = 110.0  # our INA219 max power in W * 100
     BASE_CHARGING_RATE: ClassVar[float] = 0.5  # Base % increase per second

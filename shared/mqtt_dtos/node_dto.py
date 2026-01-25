@@ -76,4 +76,4 @@ class NodeTelemetry(BaseModel):
     
     @field_validator("current_vehicle_soc")
     def soc_default_if_none(cls, v):
-        return v if v is not None else -1
+        return v if v is not None else 0
