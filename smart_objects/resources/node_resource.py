@@ -37,7 +37,7 @@ class Node(SmartObjectResource):
         mqtt_service: Optional[MQTTService] = None,
         max_power_kw: float = 78.0,
         simulation: bool = True,
-        serial_port: str = "COM3",
+        serial_port: str = "COM7",
     ):
         super().__init__(resource_id=node_id)
         self.node_id = node_id
@@ -53,12 +53,12 @@ class Node(SmartObjectResource):
                 # Creiamo l'istanza e connettiamo
                 self.bridge = ArduinoSerialBridge(port=serial_port)
                 self.bridge.connect()
-                self.logger.info(f"Bridge initialized on {serial_port}")
+                self.logger.info(f"✅ Bridge initialized on {serial_port}")
             except Exception as e:
                 self.logger.error(
-                    f"Failed to init bridge: {e}. Fallback to simulation."
+                    f"❌ Failed to init bridge on {serial_port}: {e}. Fallback to simulation."
                 )
-                simulation = True
+                raise
 
         self.power_sensor = INA219Sensor(bridge=self.bridge, simulation=simulation)
         self.distance_sensor = HC_SR04(bridge=self.bridge, simulation=simulation)

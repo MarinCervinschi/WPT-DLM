@@ -65,7 +65,11 @@ class Hub(SmartObject):
         )
 
     def add_node(
-        self, node_id: str, max_power_kw: float = 22.0, simulation: bool = True
+        self, 
+        node_id: str, 
+        max_power_kw: float = 22.0, 
+        simulation: bool = True,
+        serial_port: str = "COM7"
     ) -> Node:
         """
         Add a charging node to this hub.
@@ -74,6 +78,7 @@ class Hub(SmartObject):
             node_id: Unique node identifier
             max_power_kw: Maximum power for this node
             simulation: Whether to use simulated sensors/actuators
+            serial_port: Serial port for Arduino connection (e.g., "COM7")
 
         Returns:
             The created Node resource
@@ -84,6 +89,7 @@ class Hub(SmartObject):
             mqtt_service=self.mqtt_service,
             max_power_kw=max_power_kw,
             simulation=simulation,
+            serial_port=serial_port,
         )
 
         self.resource_map[node_id] = node

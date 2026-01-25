@@ -52,7 +52,6 @@ class ElectricVehicle(SmartObject):
 
         request_topic = "iot/hubs/+/requests"
         self.mqtt_service.subscribe(request_topic, self._on_charging_request)
-        self.logger.info(f"Subscribed to charging request topic: {request_topic}")
 
     def _on_charging_request(self, msg) -> None:
         """Handle charging request messages."""

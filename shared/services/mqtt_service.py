@@ -3,8 +3,6 @@ from typing import Callable, Optional
 
 import paho.mqtt.client as mqtt
 
-logger = logging.getLogger(__name__)
-
 
 class MQTTService:
     """Simple MQTT service for publishing and subscribing to topics."""
@@ -31,30 +29,34 @@ class MQTTService:
         self.client.on_message = self._on_message
         self._connected = False
 
+        self.logger = logging.getLogger("MQTTService")
+
     def _on_connect(self, client, userdata, flags, rc):
         """Callback for when the client connects to the broker."""
         if rc == 0:
             self._connected = True
-            logger.info(
+            self.logger.info(
                 f"Connected to MQTT broker at {self.broker_host}:{self.broker_port}"
             )
         else:
             self._connected = False
-            logger.error(f"Failed to connect to MQTT broker. Return code: {rc}")
+            self.logger.error(f"Failed to connect to MQTT broker. Return code: {rc}")
 
     def _on_disconnect(self, client, userdata, rc):
         """Callback for when the client disconnects from the broker."""
         self._connected = False
         if rc != 0:
-            logger.warning(
+            self.logger.warning(
                 f"Unexpected disconnection from MQTT broker. Return code: {rc}"
             )
         else:
-            logger.info("Disconnected from MQTT broker")
+            self.logger.info("Disconnected from MQTT broker")
 
     def _on_message(self, client, userdata, msg):
         """Default message handler."""
-        logger.debug(f"Received message on topic '{msg.topic}': {msg.payload.decode()}")
+        self.logger.debug(
+            f"Received message on topic '{msg.topic}': {msg.payload.decode()}"
+        )
 
     def connect(self) -> None:
         """Connect to the MQTT broker."""
@@ -62,7 +64,7 @@ class MQTTService:
             self.client.connect(self.broker_host, self.broker_port, keepalive=60)
             self.client.loop_start()
         except Exception as e:
-            logger.error(f"Error connecting to MQTT broker: {e}")
+            self.logger.error(f"Error connecting to MQTT broker: {e}")
             raise
 
     def disconnect(self) -> None:
@@ -83,14 +85,16 @@ class MQTTService:
             retain: Whether to retain the message
         """
         if not self._connected:
-            logger.warning("Cannot publish: not connected to broker")
+            self.logger.warning("Cannot publish: not connected to broker")
             return
 
         result = self.client.publish(topic, payload, qos=qos, retain=retain)
         if result.rc == mqtt.MQTT_ERR_SUCCESS:
-            logger.debug(f"Published to '{topic}': {payload}")
+            self.logger.debug(f"Published to '{topic}': {payload}")
         else:
-            logger.error(f"Failed to publish to '{topic}'. Return code: {result.rc}")
+            self.logger.error(
+                f"Failed to publish to '{topic}'. Return code: {result.rc}"
+            )
 
     def subscribe(
         self, topic: str, callback: Optional[Callable] = None, qos: int = 0
@@ -110,9 +114,11 @@ class MQTTService:
 
         result = self.client.subscribe(topic, qos=qos)
         if result[0] == mqtt.MQTT_ERR_SUCCESS:
-            logger.info(f"Subscribed to topic: {topic}")
+            self.logger.info(f"Subscribed to topic: {topic}")
         else:
-            logger.error(f"Failed to subscribe to '{topic}'. Return code: {result[0]}")
+            self.logger.error(
+                f"Failed to subscribe to '{topic}'. Return code: {result[0]}"
+            )
 
     def unsubscribe(self, topic: str) -> None:
         """
@@ -123,9 +129,9 @@ class MQTTService:
         """
         result = self.client.unsubscribe(topic)
         if result[0] == mqtt.MQTT_ERR_SUCCESS:
-            logger.info(f"Unsubscribed from topic: {topic}")
+            self.logger.info(f"Unsubscribed from topic: {topic}")
         else:
-            logger.error(
+            self.logger.error(
                 f"Failed to unsubscribe from '{topic}'. Return code: {result[0]}"
             )
 
