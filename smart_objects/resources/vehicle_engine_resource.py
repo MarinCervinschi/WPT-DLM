@@ -71,6 +71,8 @@ class VehicleEngineResource(SmartObjectResource):
 
     def _sample_initial_battery_level(self) -> float:
         """Sample initial battery level between min and max."""
+        if not self.simulation:
+            return 15.0
         return self.MIN_BATTERY_LEVEL + random.random() * (
             self.MAX_BATTERY_LEVEL - self.MIN_BATTERY_LEVEL
         )
@@ -152,6 +154,8 @@ class VehicleEngineResource(SmartObjectResource):
     def _update_battery(self) -> None:
         """Update battery level based on consumption or charging."""
         if not self.is_charging:
+            if not self.simulation:
+                return
             consumption = random.uniform(
                 self.MIN_BATTERY_CONSUMPTION,
                 self.MAX_BATTERY_CONSUMPTION,
@@ -187,7 +191,7 @@ class VehicleEngineResource(SmartObjectResource):
         """Update vehicle state (speed, temperature)."""
         if self.is_charging:
             self.speed_kmh = 0.0
-        else:
+        elif self.simulation:
             self.speed_kmh = random.uniform(0, 120)
             self.engine_temp_c = random.uniform(20, 60)
 
