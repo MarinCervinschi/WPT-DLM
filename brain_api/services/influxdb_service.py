@@ -7,8 +7,6 @@ from influxdb_client.client.query_api import QueryApi
 
 from ..core.config import settings
 
-logger = logging.getLogger(__name__)
-
 
 class InfluxDBService:
     """Service for querying InfluxDB telemetry data."""
@@ -22,6 +20,8 @@ class InfluxDBService:
         )
         self.query_api: QueryApi = self.client.query_api()
         self.bucket = settings.INFLUXDB_BUCKET
+
+        self.logger = logging.getLogger("InfluxDBService")
 
     def get_session_metrics(
         self, node_id: str, start_time: datetime, end_time: Optional[datetime] = None
@@ -71,7 +71,7 @@ class InfluxDBService:
                             float(record.get_value()), 3
                         )
 
-            logger.debug(
+            self.logger.debug(
                 f"Session metrics for node {node_id}: "
                 f"{metrics['total_energy_kwh']:.2f} kWh, {metrics['avg_power_kw']:.2f} kW avg"
             )
@@ -79,7 +79,7 @@ class InfluxDBService:
             return metrics
 
         except Exception as e:
-            logger.error(f"Error querying InfluxDB for session metrics: {e}")
+            self.logger.error(f"Error querying InfluxDB for session metrics: {e}")
             # Return zeros if query fails
             return {"total_energy_kwh": 0.0, "avg_power_kw": 0.0}
 
@@ -112,13 +112,13 @@ class InfluxDBService:
                     telemetry[field] = value
 
             if telemetry:
-                logger.debug(f"Latest telemetry for node {node_id}: {telemetry}")
+                self.logger.debug(f"Latest telemetry for node {node_id}: {telemetry}")
                 return telemetry
 
             return None
 
         except Exception as e:
-            logger.error(f"Error querying InfluxDB for node telemetry: {e}")
+            self.logger.error(f"Error querying InfluxDB for node telemetry: {e}")
             return None
 
     def get_nodes_current_state(self, node_ids: list[str]) -> dict[str, dict]:
@@ -158,11 +158,11 @@ class InfluxDBService:
                     value = record.get_value()
                     nodes_state[node_id][field] = value
 
-            logger.debug(f"Retrieved state for {len(nodes_state)} nodes")
+            self.logger.debug(f"Retrieved state for {len(nodes_state)} nodes")
             return nodes_state
 
         except Exception as e:
-            logger.error(f"Error querying InfluxDB for nodes state: {e}")
+            self.logger.error(f"Error querying InfluxDB for nodes state: {e}")
             return {}
 
     def get_latest_vehicle_telemetry(self, vehicle_id: str) -> Optional[dict]:
@@ -194,14 +194,16 @@ class InfluxDBService:
                     telemetry[field] = value
 
             if telemetry:
-                logger.debug(f"Latest telemetry for vehicle {vehicle_id}: {telemetry}")
+                self.logger.debug(
+                    f"Latest telemetry for vehicle {vehicle_id}: {telemetry}"
+                )
                 return telemetry
             else:
-                logger.warning(f"No telemetry found for vehicle {vehicle_id}")
+                self.logger.warning(f"No telemetry found for vehicle {vehicle_id}")
                 return None
 
         except Exception as e:
-            logger.error(f"Error querying InfluxDB for vehicle telemetry: {e}")
+            self.logger.error(f"Error querying InfluxDB for vehicle telemetry: {e}")
             return None
 
     def close(self):

@@ -6,8 +6,6 @@ from sqlalchemy.orm import Session
 
 from ..repositories.base import BaseRepository
 
-logger = logging.getLogger(__name__)
-
 ModelT = TypeVar("ModelT")
 RepoT = TypeVar("RepoT", bound=BaseRepository)
 CreateSchemaT = TypeVar("CreateSchemaT", bound=BaseModel)
@@ -46,6 +44,8 @@ class BaseService(
         self.db = db
         self.repo = self.repository_class(db)
 
+        self.logger = logging.getLogger(self.__class__.__name__)
+
     def get(self, pk: Any) -> ResponseSchemaT:
         """Get an entity by primary key."""
         entity = self.repo.get_or_raise(pk)
@@ -67,7 +67,7 @@ class BaseService(
         """Create a new entity."""
         entity = self.repo.create(data.model_dump())
         self.db.commit()
-        logger.info(
+        self.logger.info(
             f"Created {self.repo.model.__name__}: {getattr(entity, self.repo.pk_field)}"
         )
         return self.response_schema.model_validate(entity)
@@ -76,7 +76,7 @@ class BaseService(
         """Update an entity."""
         entity = self.repo.update(pk, data.model_dump(exclude_unset=True))
         self.db.commit()
-        logger.info(f"Updated {self.repo.model.__name__}: {pk}")
+        self.logger.info(f"Updated {self.repo.model.__name__}: {pk}")
         return self.response_schema.model_validate(entity)
 
     def delete(self, pk: Any) -> bool:
@@ -84,5 +84,5 @@ class BaseService(
         result = self.repo.delete(pk)
         if result:
             self.db.commit()
-            logger.info(f"Deleted {self.repo.model.__name__}: {pk}")
+            self.logger.info(f"Deleted {self.repo.model.__name__}: {pk}")
         return result

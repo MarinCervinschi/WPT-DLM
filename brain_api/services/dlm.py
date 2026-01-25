@@ -1,4 +1,3 @@
-import logging
 from typing import List
 
 from sqlalchemy.orm import Session
@@ -12,8 +11,6 @@ from ..schemas import (
     DLMEventResponse,
 )
 from .base import BaseService
-
-logger = logging.getLogger(__name__)
 
 
 class DLMService(
@@ -82,5 +79,5 @@ class DLMService(
             available_capacity=data.available_capacity_at_trigger,
         )
         self.db.commit()
-        logger.info(f"DLM Event: {data.trigger_reason} on {data.node_id}")
+        self.logger.info(f"DLM Event: {data.trigger_reason} on {data.node_id}")
         return DLMEventResponse.model_validate(event)

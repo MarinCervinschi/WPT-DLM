@@ -8,8 +8,6 @@ from ..repositories import HubRepository, NodeRepository
 from ..schemas import RecommendationRequest, RecommendationResponse
 from .influxdb_service import InfluxDBService
 
-logger = logging.getLogger(__name__)
-
 
 class RecommendationService:
     """Service for generating charging station recommendations."""
@@ -19,6 +17,8 @@ class RecommendationService:
         self.hub_repo = HubRepository(db)
         self.node_repo = NodeRepository(db)
         self.influx_service = influx_service
+
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def get_recommendation(
         self, request: RecommendationRequest
@@ -35,7 +35,7 @@ class RecommendationService:
         active_hubs = list(self.hub_repo.get_active_hubs())
 
         if not active_hubs:
-            logger.warning("No active hubs available for recommendation")
+            self.logger.warning("No active hubs available for recommendation")
             return None
 
         best_recommendation = None
@@ -88,7 +88,7 @@ class RecommendationService:
                     }
 
         if not best_recommendation:
-            logger.warning("No available nodes found for recommendation")
+            self.logger.warning("No available nodes found for recommendation")
             return None
 
         estimated_wait_time = self._estimate_wait_time(
