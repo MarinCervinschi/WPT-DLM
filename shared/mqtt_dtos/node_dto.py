@@ -73,3 +73,7 @@ class NodeTelemetry(BaseModel):
     @field_validator("connected_vehicle_id")
     def set_default_if_none(cls, v):
         return v if v is not None else "n/a"
+    
+    @field_validator("current_vehicle_soc")
+    def soc_default_if_none(cls, v):
+        return v if v is not None else -1
