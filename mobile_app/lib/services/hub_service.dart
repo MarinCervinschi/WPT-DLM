@@ -4,7 +4,7 @@ import '../models/hub.dart';
 import '../core/logger/app_logger.dart';
 
 class HubService {
-  final String baseUrl = "http://localhost:8000";
+  final String baseUrl = "http://172.20.10.2:8000";
 
   // GET /hubs - Returns a list of hubs with optional filters
   Future<List<Hub>> getAllHubs({int skip = 0, int limit = 100, bool activeOnly = false}) async {

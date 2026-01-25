@@ -5,7 +5,7 @@ import '../models/vehicle.dart';
 import '../core/logger/app_logger.dart';
 
 class ApiService {
-  final String baseUrl = "http://localhost:8000";
+  final String baseUrl = "http://172.20.10.2:8000";
 
   Future<void> saveVehicleId(String id) async {
     final prefs = await SharedPreferences.getInstance();
