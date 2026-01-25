@@ -18,6 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger("DLM_Gateway_Hub")
 
 logging.getLogger("iot:actuator:l298n").setLevel(logging.DEBUG)
+logging.getLogger("hw_node").setLevel(logging.DEBUG)
 
 
 @asynccontextmanager
