@@ -1042,17 +1042,17 @@
       {
         "current": {},
         "datasource": {
-          "type": "influxdb",
-          "uid": "influxdb"
+          "type": "postgres",
+          "uid": "postgresql"
         },
-        "definition": "import \"influxdata/influxdb/schema\"\n\nschema.tagValues(\n  bucket: \"telemetry\",\n  tag: \"vehicle_id\",\n  predicate: (r) => true,\n  start: -30d\n)",
+        "definition": "SELECT vehicle_id FROM vehicles ORDER BY vehicle_id",
         "hide": 0,
         "includeAll": false,
         "label": "Vehicle ID",
         "multi": false,
         "name": "vehicle_id",
         "options": [],
-        "query": "import \"influxdata/influxdb/schema\"\n\nschema.tagValues(\n  bucket: \"telemetry\",\n  tag: \"vehicle_id\",\n  predicate: (r) => true,\n  start: -30d\n)",
+        "query": "SELECT vehicle_id FROM vehicles ORDER BY vehicle_id",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,

@@ -126,7 +126,9 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "_value"
         },
         "showThresholdLabels": false,
@@ -210,7 +212,9 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": ""
         },
         "textMode": "value_and_name"
@@ -282,7 +286,9 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "_value"
         },
         "textMode": "value"
@@ -338,7 +344,9 @@
         "orientation": "horizontal",
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": ""
         },
         "textMode": "auto"
@@ -437,7 +445,10 @@
               {
                 "id": "custom.lineStyle",
                 "value": {
-                  "dash": [10, 10],
+                  "dash": [
+                    10,
+                    10
+                  ],
                   "fill": "dash"
                 }
               },
@@ -473,7 +484,11 @@
       "id": 6,
       "options": {
         "legend": {
-          "calcs": ["lastNotNull", "max", "mean"],
+          "calcs": [
+            "lastNotNull",
+            "max",
+            "mean"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -559,7 +574,12 @@
       "id": 7,
       "options": {
         "legend": {
-          "calcs": ["lastNotNull", "max", "min", "mean"],
+          "calcs": [
+            "lastNotNull",
+            "max",
+            "min",
+            "mean"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -645,7 +665,12 @@
       "id": 8,
       "options": {
         "legend": {
-          "calcs": ["lastNotNull", "max", "min", "mean"],
+          "calcs": [
+            "lastNotNull",
+            "max",
+            "min",
+            "mean"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -733,7 +758,9 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["last"],
+          "calcs": [
+            "last"
+          ],
           "fields": ""
         },
         "showThresholdLabels": false,
@@ -812,7 +839,9 @@
         "orientation": "auto",
         "reduceOptions": {
           "values": false,
-          "calcs": ["last"],
+          "calcs": [
+            "last"
+          ],
           "fields": "_value"
         },
         "textMode": "auto"
@@ -896,7 +925,11 @@
       "id": 11,
       "options": {
         "legend": {
-          "calcs": ["lastNotNull", "max", "min"],
+          "calcs": [
+            "lastNotNull",
+            "max",
+            "min"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -921,8 +954,8 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "influxdb"
+        "type": "postgres",
+        "uid": "postgresql"
       },
       "fieldConfig": {
         "defaults": {
@@ -961,7 +994,9 @@
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": ["sum"],
+          "reducer": [
+            "sum"
+          ],
           "show": false
         },
         "showHeader": true,
@@ -988,7 +1023,9 @@
           "select": [
             [
               {
-                "params": ["value"],
+                "params": [
+                  "value"
+                ],
                 "type": "column"
               }
             ]
@@ -1040,7 +1077,9 @@
       "options": {
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": ""
         },
         "orientation": "auto",
@@ -1061,7 +1100,7 @@
         }
       ],
       "title": "Telemetry History",
-      "type": "gauge"
+      "type": "table"
     },
     {
       "datasource": {
@@ -1101,7 +1140,12 @@
   "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["digital-twin", "node", "charging", "iot"],
+  "tags": [
+    "digital-twin",
+    "node",
+    "charging",
+    "iot"
+  ],
   "templating": {
     "list": [
       {

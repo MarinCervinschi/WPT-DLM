@@ -635,8 +635,8 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "influxdb"
+        "type": "postgres",
+        "uid": "postgresql"
       },
       "fieldConfig": {
         "defaults": {
