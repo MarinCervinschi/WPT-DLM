@@ -1,7 +1,7 @@
 import datetime
 from datetime import datetime, timezone
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class DLMNotification(BaseModel):
@@ -30,3 +30,16 @@ class DLMNotification(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="Event timestamp",
     )
+
+    @field_validator("available_capacity")
+    def capacity_must_be_non_negative(cls, v: float):
+        if v is None or v < 0:
+            return 0.0
+        return v
+    
+    @field_validator("total_grid_load")
+    def load_must_be_non_negative(cls, v: float):
+        if v is None or v < 0:
+            return 0.0
+        return v
+    

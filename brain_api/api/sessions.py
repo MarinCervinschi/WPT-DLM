@@ -91,3 +91,19 @@ def end_session(
         return service.end(session_id, data)
     except NotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+@router.delete(
+    "/{session_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a charging session",
+)
+def delete_session(
+    session_id: int,
+    service: ChargingSessionServiceDep,
+) -> None:
+    """Delete a charging session by its ID."""
+    if not service.delete(session_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Charging session {session_id} not found",
+        )
