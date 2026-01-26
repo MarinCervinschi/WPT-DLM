@@ -53,9 +53,11 @@ def create_vehicle(data: VehicleCreate, service: VehicleServiceDep) -> VehicleRe
     response_model=VehicleResponse,
     summary="Get or register a vehicle",
 )
-def register_vehicle(vehicle_id: str, service: VehicleServiceDep) -> VehicleResponse:
+def register_vehicle(
+    vehicle_id: str, data: VehicleCreate, service: VehicleServiceDep
+) -> VehicleResponse:
     """Get existing vehicle or auto-register if not found."""
-    return service.get_or_create(vehicle_id)
+    return service.get_or_create(vehicle_id, data)
 
 
 @router.patch(
