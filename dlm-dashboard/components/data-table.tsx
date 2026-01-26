@@ -26,14 +26,16 @@ interface DataTableProps<T> {
   isLoading?: boolean;
   emptyMessage?: string;
   onRowClick?: (item: T) => void;
+  getRowKey?: (item: T, index: number) => string;
 }
 
-export function DataTable<T extends { id: string }>({
+export function DataTable<T>({
   columns,
   data,
   isLoading,
   emptyMessage = "No data found",
   onRowClick,
+  getRowKey = (item: any, index: number) => `${item.id || item.node_id || item.hub_id || item.vehicle_id || item.charging_session_id || item.dlm_event_id || 'item'}-${index}`,
 }: DataTableProps<T>) {
   if (isLoading) {
     return (
@@ -77,7 +79,7 @@ export function DataTable<T extends { id: string }>({
           ) : (
             data.map((item, i) => (
               <TableRow
-                key={`${item.id}-${i}`}
+                key={getRowKey(item, i)}
                 onClick={() => onRowClick?.(item)}
                 className={cn(
                   "transition-colors border-b border-border last:border-0",
