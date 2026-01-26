@@ -3,7 +3,7 @@ from typing import Any, Sequence
 
 from sqlalchemy import and_, func, select
 
-from ..models import DLMEvent
+from ..models import DLMEventDbo as DLMEvent
 from ..schemas import DLMEventCreate
 from .base import BaseRepository
 

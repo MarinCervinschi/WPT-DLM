@@ -1,9 +1,8 @@
-import logging
 from typing import List
 
 from sqlalchemy.orm import Session
 
-from ..models import ChargingSession
+from ..models import ChargingSessionDbo
 from ..repositories import ChargingSessionRepository, NodeRepository, VehicleRepository
 from ..schemas import (
     ChargingSessionCreate,
@@ -15,12 +14,10 @@ from ..schemas import (
 )
 from .base import BaseService
 
-logger = logging.getLogger(__name__)
-
 
 class ChargingSessionService(
     BaseService[
-        ChargingSession,
+        ChargingSessionDbo,
         ChargingSessionRepository,
         ChargingSessionCreate,
         ChargingSessionUpdate,
@@ -78,7 +75,7 @@ class ChargingSessionService(
 
         session = self.repo.start_session(data.node_id, data.vehicle_id)
         self.db.commit()
-        logger.info(
+        self.logger.info(
             f"Started session {session.charging_session_id} on node {data.node_id}"
         )
         return ChargingSessionResponse.model_validate(session)
@@ -91,5 +88,5 @@ class ChargingSessionService(
             data.avg_power_kw,
         )
         self.db.commit()
-        logger.info(f"Ended session {session_id}: {data.total_energy_kwh} kWh")
+        self.logger.info(f"Ended session {session_id}: {data.total_energy_kwh} kWh")
         return ChargingSessionResponse.model_validate(session)

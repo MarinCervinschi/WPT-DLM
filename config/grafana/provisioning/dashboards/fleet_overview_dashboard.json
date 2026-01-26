@@ -1,0 +1,1111 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [
+        {
+            "asDropdown": false,
+            "icon": "external link",
+            "includeVars": false,
+            "keepTime": true,
+            "tags": [
+                "digital-twin"
+            ],
+            "targetBlank": false,
+            "title": "Digital Twin Dashboards",
+            "tooltip": "",
+            "type": "dashboards",
+            "url": ""
+        }
+    ],
+    "liveNow": false,
+    "panels": [
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "postgresql"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "options": {
+                "code": {
+                    "language": "plaintext",
+                    "showLineNumbers": false,
+                    "showMiniMap": false
+                },
+                "content": "# Fleet Overview Dashboard\n\nComplete real-time monitoring of all charging infrastructure, vehicles, and power management across the entire fleet.",
+                "mode": "markdown"
+            },
+            "pluginVersion": "10.0.0",
+            "title": "Dashboard Header",
+            "type": "text"
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "postgresql"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 4,
+                "x": 0,
+                "y": 3
+            },
+            "id": 2,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "values": false,
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": ""
+                },
+                "textMode": "auto"
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "postgresql"
+                    },
+                    "format": "table",
+                    "rawSql": "SELECT COUNT(*) AS value FROM hubs WHERE is_active = true",
+                    "refId": "A"
+                }
+            ],
+            "title": "Active Hubs",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 4,
+                "x": 4,
+                "y": 3
+            },
+            "id": 3,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "values": false,
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": ""
+                },
+                "textMode": "auto"
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdb"
+                    },
+                    "query": "from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_status\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\")\n  |> filter(fn: (r) => r[\"_value\"] == \"charging\")\n  |> group(columns: [\"node_id\"])\n  |> last()\n  |> group()\n  |> count()\n  |> keep(columns: [\"_value\"])",
+                    "refId": "A"
+                }
+            ],
+            "title": "Charging Nodes",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "blue",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 4,
+                "x": 8,
+                "y": 3
+            },
+            "id": 4,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "values": false,
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": ""
+                },
+                "textMode": "auto"
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdb"
+                    },
+                    "query": "from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_occupied\")\n  |> filter(fn: (r) => r[\"_value\"] == true)\n  |> group(columns: [\"node_id\"])\n  |> last()\n  |> group()\n  |> count()\n  |> keep(columns: [\"_value\"])",
+                    "refId": "A"
+                }
+            ],
+            "title": "Occupied Nodes",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 4,
+                "x": 12,
+                "y": 3
+            },
+            "id": 5,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "values": false,
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": ""
+                },
+                "textMode": "auto"
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdb"
+                    },
+                    "query": "from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> filter(fn: (r) => r[\"_field\"] == \"is_charging\")\n  |> filter(fn: (r) => r[\"_value\"] == true)\n  |> group(columns: [\"vehicle_id\"])\n  |> last()\n  |> group()\n  |> count()\n  |> keep(columns: [\"_value\"])",
+                    "refId": "A"
+                }
+            ],
+            "title": "Vehicles Charging",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 500
+                            },
+                            {
+                                "color": "red",
+                                "value": 800
+                            }
+                        ]
+                    },
+                    "unit": "kwatt"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 4,
+                "x": 16,
+                "y": 3
+            },
+            "id": 6,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "values": false,
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": ""
+                },
+                "textMode": "auto"
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdb"
+                    },
+                    "query": "from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_kw\")\n  |> group(columns: [\"node_id\"])\n  |> last()\n  |> group()\n  |> sum()\n  |> keep(columns: [\"_value\"])",
+                    "refId": "A"
+                }
+            ],
+            "title": "Total Power Consumption",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "postgresql"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 4,
+                "x": 20,
+                "y": 3
+            },
+            "id": 7,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "values": false,
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": ""
+                },
+                "textMode": "auto"
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "postgresql"
+                    },
+                    "format": "table",
+                    "rawSql": "SELECT COUNT(*) AS value FROM charging_sessions WHERE end_time IS NULL",
+                    "refId": "A"
+                }
+            ],
+            "title": "Active Sessions",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "State"
+                        },
+                        "properties": [
+                            {
+                                "id": "mappings",
+                                "value": [
+                                    {
+                                        "options": {
+                                            "online": {
+                                                "color": "green",
+                                                "index": 0
+                                            },
+                                            "offline": {
+                                                "color": "red",
+                                                "index": 1
+                                            },
+                                            "maintenance": {
+                                                "color": "orange",
+                                                "index": 2
+                                            }
+                                        },
+                                        "type": "value"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "type": "color-background"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Hub ID"
+                        },
+                        "properties": [
+                            {
+                                "id": "links",
+                                "value": [
+                                    {
+                                        "targetBlank": false,
+                                        "title": "Open Hub Digital Twin",
+                                        "url": "/d/hub-digital-twin?var-hub_id=${__data.fields[\"Hub ID\"]}"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 8
+            },
+            "id": 8,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": []
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdb"
+                    },
+                    "query": "status = from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"hub_status\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"hub_id\"])\n  |> last(column: \"_time\")\n\npower = from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> filter(fn: (r) => r[\"_field\"] == \"power_kw\")\n  |> group(columns: [\"hub_id\"])\n  |> sum()\n  |> rename(columns: {_value: \"total_power\"})\n\njoin(\n  tables: {s: status, p: power},\n  on: [\"hub_id\"]\n)\n|> keep(columns: [\"hub_id\", \"state\", \"cpu_temp\", \"total_power\"])\n|> rename(columns: {hub_id: \"Hub ID\", state: \"State\", cpu_temp: \"CPU Temp (°C)\", total_power: \"Total Power (kW)\"})",
+                    "refId": "A"
+                }
+            ],
+            "title": "Hub Status Overview",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "State"
+                        },
+                        "properties": [
+                            {
+                                "id": "mappings",
+                                "value": [
+                                    {
+                                        "options": {
+                                            "idle": {
+                                                "color": "blue",
+                                                "index": 0
+                                            },
+                                            "charging": {
+                                                "color": "green",
+                                                "index": 1
+                                            },
+                                            "full": {
+                                                "color": "light-green",
+                                                "index": 2
+                                            },
+                                            "faulted": {
+                                                "color": "red",
+                                                "index": 3
+                                            }
+                                        },
+                                        "type": "value"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "type": "color-background"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Occupied"
+                        },
+                        "properties": [
+                            {
+                                "id": "mappings",
+                                "value": [
+                                    {
+                                        "options": {
+                                            "false": {
+                                                "color": "text",
+                                                "index": 0,
+                                                "text": "No"
+                                            },
+                                            "true": {
+                                                "color": "orange",
+                                                "index": 1,
+                                                "text": "Yes"
+                                            }
+                                        },
+                                        "type": "value"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "type": "color-background"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Node ID"
+                        },
+                        "properties": [
+                            {
+                                "id": "links",
+                                "value": [
+                                    {
+                                        "targetBlank": false,
+                                        "title": "Open Node Digital Twin",
+                                        "url": "/d/node-digital-twin?var-node_id=${__data.fields[\"Node ID\"]}"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 24,
+                "x": 0,
+                "y": 16
+            },
+            "id": 9,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": true,
+                        "displayName": "Power (kW)"
+                    }
+                ]
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdb"
+                    },
+                    "query": "telemetry = from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_telemetry\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"node_id\"])\n  |> last(column: \"_time\")\n  |> group()\n\nstatus = from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"node_status\")\n  |> filter(fn: (r) => r[\"_field\"] == \"state\" or r[\"_field\"] == \"error_code\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"node_id\"])\n  |> last(column: \"_time\")\n  |> group()\n\njoin(\n  tables: {t: telemetry, s: status},\n  on: [\"node_id\", \"hub_id\"]\n)\n|> keep(columns: [\"hub_id\", \"node_id\", \"state\", \"power_kw\", \"power_limit_kw\", \"is_occupied\", \"connected_vehicle_id\", \"current_vehicle_soc\", \"error_code\"])\n|> rename(columns: {hub_id: \"Hub ID\", node_id: \"Node ID\", state: \"State\", power_kw: \"Power (kW)\", power_limit_kw: \"Limit (kW)\", is_occupied: \"Occupied\", connected_vehicle_id: \"Vehicle ID\", current_vehicle_soc: \"SOC (%)\", error_code: \"Error\"})",
+                    "refId": "A"
+                }
+            ],
+            "title": "All Charging Nodes Status",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "influxdb"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Charging"
+                        },
+                        "properties": [
+                            {
+                                "id": "mappings",
+                                "value": [
+                                    {
+                                        "options": {
+                                            "false": {
+                                                "color": "blue",
+                                                "index": 1,
+                                                "text": "No"
+                                            },
+                                            "true": {
+                                                "color": "green",
+                                                "index": 0,
+                                                "text": "Yes"
+                                            }
+                                        },
+                                        "type": "value"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "type": "color-background"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Battery (%)"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "type": "gauge"
+                                }
+                            },
+                            {
+                                "id": "max",
+                                "value": 100
+                            },
+                            {
+                                "id": "min",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Vehicle ID"
+                        },
+                        "properties": [
+                            {
+                                "id": "links",
+                                "value": [
+                                    {
+                                        "targetBlank": false,
+                                        "title": "Open Vehicle Digital Twin",
+                                        "url": "/d/vehicle-digital-twin?var-vehicle_id=${__data.fields[\"Vehicle ID\"]}"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 24,
+                "x": 0,
+                "y": 26
+            },
+            "id": 10,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": false,
+                        "displayName": "Battery (%)"
+                    }
+                ]
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "influxdb"
+                    },
+                    "query": "from(bucket: \"telemetry\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"vehicle_telemetry\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"vehicle_id\"])\n  |> last(column: \"_time\")\n  |> group()\n  |> keep(columns: [\"vehicle_id\", \"battery_level\", \"speed_kmh\", \"engine_temp_c\", \"is_charging\", \"geo_location_latitude\", \"geo_location_longitude\"])\n  |> rename(columns: {vehicle_id: \"Vehicle ID\", battery_level: \"Battery (%)\", speed_kmh: \"Speed (km/h)\", engine_temp_c: \"Temp (°C)\", is_charging: \"Charging\", geo_location_latitude: \"Latitude\", geo_location_longitude: \"Longitude\"})",
+                    "refId": "A"
+                }
+            ],
+            "title": "Active Vehicles Status",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "postgresql"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Trigger Reason"
+                        },
+                        "properties": [
+                            {
+                                "id": "mappings",
+                                "value": [
+                                    {
+                                        "options": {
+                                            "GRID_OVERLOAD": {
+                                                "color": "red",
+                                                "index": 0
+                                            },
+                                            "PRIORITY_SHIFT": {
+                                                "color": "orange",
+                                                "index": 1
+                                            },
+                                            "SCHEDULE": {
+                                                "color": "blue",
+                                                "index": 2
+                                            }
+                                        },
+                                        "type": "value"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "type": "color-background"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 24,
+                "x": 0,
+                "y": 36
+            },
+            "id": 11,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": true,
+                        "displayName": "Timestamp"
+                    }
+                ]
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "postgresql"
+                    },
+                    "format": "table",
+                    "rawSql": "SELECT \n  timestamp AS \"Timestamp\",\n  hub_id AS \"Hub ID\",\n  node_id AS \"Node ID\",\n  trigger_reason AS \"Trigger Reason\",\n  original_limit_kw AS \"Original Limit (kW)\",\n  new_limit_kw AS \"New Limit (kW)\",\n  total_grid_load_kw AS \"Total Grid Load (kW)\",\n  available_capacity_at_trigger AS \"Available Capacity (kW)\"\nFROM dlm_events\nWHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo()\nORDER BY timestamp DESC\nLIMIT 100",
+                    "refId": "A"
+                }
+            ],
+            "title": "Recent DLM Events",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "postgresql"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Energy (kWh)"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.cellOptions",
+                                "value": {
+                                    "type": "gauge"
+                                }
+                            },
+                            {
+                                "id": "max",
+                                "value": 100
+                            },
+                            {
+                                "id": "min",
+                                "value": 0
+                            },
+                            {
+                                "id": "unit",
+                                "value": "kwatth"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Duration (min)"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "m"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 24,
+                "x": 0,
+                "y": 46
+            },
+            "id": 12,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "countRows": false,
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": true,
+                        "displayName": "Started At"
+                    }
+                ]
+            },
+            "pluginVersion": "10.0.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "postgres",
+                        "uid": "postgresql"
+                    },
+                    "format": "table",
+                    "rawSql": "SELECT \n  cs.charging_session_id AS \"Session ID\",\n  cs.node_id AS \"Node ID\",\n  cs.vehicle_id AS \"Vehicle ID\",\n  v.model AS \"Vehicle Model\",\n  cs.start_time AS \"Started At\",\n  cs.total_energy_kwh AS \"Energy (kWh)\",\n  cs.avg_power_kw AS \"Avg Power (kW)\",\n  EXTRACT(EPOCH FROM (NOW() - cs.start_time))/60 AS \"Duration (min)\"\nFROM charging_sessions cs\nLEFT JOIN vehicles v ON cs.vehicle_id = v.vehicle_id\nWHERE cs.end_time IS NULL\nORDER BY cs.start_time DESC",
+                    "refId": "A"
+                }
+            ],
+            "title": "Active Charging Sessions",
+            "type": "table"
+        }
+    ],
+    "refresh": "5s",
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [
+        "digital-twin",
+        "overview",
+        "fleet",
+        "iot"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-1h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Fleet Overview Dashboard",
+    "uid": "fleet-overview-dashboard",
+    "version": 1,
+    "weekStart": ""
+}

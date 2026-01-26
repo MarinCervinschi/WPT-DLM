@@ -1,0 +1,42 @@
+from sqlalchemy import Boolean, Column, Float, ForeignKey, String
+from sqlalchemy.orm import relationship
+
+from ..db import Base
+
+
+class NodeDbo(Base):
+    """
+    The Node (Charging Point) - individual charging station.
+
+    Each node belongs to a hub and can have multiple charging sessions.
+    """
+
+    __tablename__ = "nodes"
+
+    node_id = Column(String(50), primary_key=True, index=True)
+    hub_id = Column(
+        String(50),
+        ForeignKey("hubs.hub_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    max_power_kw = Column(
+        Float,
+        nullable=False,
+        default=22.0,
+        comment="Maximum power output in kW (depending on hub capacity)",
+    )
+
+    is_maintenance = Column(Boolean, nullable=False, default=False)
+
+    hub = relationship("HubDbo", back_populates="nodes")
+    sessions = relationship(
+        "ChargingSessionDbo", back_populates="node", cascade="all, delete-orphan"
+    )
+    dlm_events = relationship(
+        "DLMEventDbo", back_populates="node", cascade="all, delete-orphan"
+    )
+
+    def __repr__(self) -> str:
+        return f"<Node(id={self.node_id}, hub={self.hub_id}, max_power={self.max_power_kw}kW)>"

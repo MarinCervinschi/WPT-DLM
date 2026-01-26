@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from ..models import Node
+from ..models import NodeDbo
 from ..repositories import HubRepository, NodeRepository
 from ..schemas import NodeCreate, NodeListResponse, NodeResponse, NodeUpdate
 from .base import BaseService
@@ -8,7 +8,12 @@ from .base import BaseService
 
 class NodeService(
     BaseService[
-        Node, NodeRepository, NodeCreate, NodeUpdate, NodeResponse, NodeListResponse
+        NodeDbo,
+        NodeRepository,
+        NodeCreate,
+        NodeUpdate,
+        NodeResponse,
+        NodeListResponse,
     ]
 ):
     """Service layer for Node operations."""

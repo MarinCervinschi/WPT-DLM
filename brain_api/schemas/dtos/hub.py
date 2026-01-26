@@ -1,7 +1,3 @@
-"""
-Hub DTOs - Pydantic schemas for Hub entity.
-"""
-
 from datetime import datetime
 from typing import Optional
 
@@ -31,6 +27,10 @@ class HubCreate(HubBase):
 
     hub_id: str = Field(..., min_length=1, max_length=50, description="Unique hub ID")
     is_active: bool = Field(True, description="Whether the hub is active")
+    ip_address: str = Field(
+        ..., min_length=7, max_length=45, description="Hub IP address"
+    )
+    firmware_version: str = Field(..., max_length=20, description="Firmware version")
 
 
 # ==================== Update Schema ====================
@@ -44,6 +44,8 @@ class HubUpdate(BaseModel):
     alt: Optional[float] = Field(None, ge=-500, le=10000)
     max_grid_capacity_kw: Optional[float] = Field(None, gt=0)
     is_active: Optional[bool] = None
+    ip_address: Optional[str] = Field(None, min_length=7, max_length=45)
+    firmware_version: Optional[str] = Field(None, max_length=20)
 
 
 # ==================== Response Schemas ====================

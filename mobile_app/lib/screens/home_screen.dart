@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_app/core/logger/app_logger.dart';
 import 'package:mobile_app/theme/theme.dart';
 import 'package:mobile_app/widgets/custom_scaffold.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:mobile_app/widgets/telemetry_card.dart';
 import '../services/vehicle.dart';
 import 'dart:convert';
-import 'dart:math';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,53 +17,79 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _apiService = ApiService();
-  late WebSocketChannel _channel;
+  WebSocketChannel? _channel;
   String? _vehicleId;
   Map<String, dynamic>? _vehicleData;
+  Map<String, dynamic>? _lastTelemetryData;
   bool _isLoading = true;
-  late Stream<String> _mockTelemetryStream;
-  final Random _random = Random();
+  Stream<String>? _realTimeTelemetryStream;
+  DateTime? _lastCacheSaveTime;
 
   @override
   void initState() {
     super.initState();
-    _initMockStream();
+    _loadCachedTelemetry();
+    _initRealTime();
     _loadVehicleData();
   }
 
   @override
   void dispose() {
-    _channel.sink.close();
+    _channel?.sink.close();
     super.dispose();
   }
 
-  void _initMockStream() {
-    // Simuliamo l'invio di dati ogni 2 secondi
-    _mockTelemetryStream = Stream.periodic(Duration(seconds: 2), (
-      computationCount,
-    ) {
-      // Creiamo un oggetto che rispetti lo schema VehicleTelemetry del tuo brain_api
-      final mockData = {
-        "battery_level": (65 + _random.nextInt(5)).toDouble(), // Simula una ricarica lenta
-        "speed": 10.0 + _random.nextDouble() * 2,
-        "engine_temp": (80 + _random.nextInt(20)).toDouble(),
-        "is_charging": true,
-        "latitude": 44.6488,
-        "longitude": 10.9200,
-        "timestamp": DateTime.now().toIso8601String(),
-      };
+  Future<void> _loadCachedTelemetry() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedData = prefs.getString('last_telemetry_data');
+      if (cachedData != null) {
+        setState(() {
+          _lastTelemetryData = jsonDecode(cachedData);
+        });
+        logger.i('Dati telemetria caricati dalla cache');
+      }
+    } catch (e) {
+      logger.e('Errore caricamento telemetria dalla cache: $e');
+    }
+  }
 
-      return jsonEncode(mockData);
-    });
+  Future<void> _saveTelemetryToCache(Map<String, dynamic> data) async {
+    try {
+      // Throttling: salva solo se sono passati almeno 5 secondi dall'ultimo salvataggio
+      final now = DateTime.now();
+      if (_lastCacheSaveTime != null) {
+        final difference = now.difference(_lastCacheSaveTime!);
+        if (difference.inSeconds < 5) {
+          return; // Salta il salvataggio
+        }
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('last_telemetry_data', jsonEncode(data));
+      _lastCacheSaveTime = now;
+      logger.d('Dati telemetria salvati in cache');
+    } catch (e) {
+      logger.e('Errore salvataggio telemetria in cache: $e');
+    }
   }
 
   void _initRealTime() async {
+    if (_channel != null) {
+      logger.i('Chiusura connessione WebSocket esistente...');
+      _channel!.sink.close();
+      _channel = null;
+    }
+
     _vehicleId = await _apiService.getSavedVehicleId();
+    logger.i('Vehicle ID trovato: $_vehicleId');
     if (_vehicleId != null) {
-      // Ci connettiamo all'endpoint WebSocket del tuo brain_api
       _channel = WebSocketChannel.connect(
-        Uri.parse('ws://localhost:8000/vehicles/websockets/$_vehicleId'),
+        Uri.parse('ws://172.20.10.2:8000/ws/telemetry/$_vehicleId'),
       );
+      logger.i('Connesso a WebSocket per veicolo $_vehicleId');
+
+      _realTimeTelemetryStream = _channel!.stream.map((data) => data.toString());
       setState(() {});
     }
   }
@@ -78,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     } catch (e) {
+      logger.e('Errore caricamento dati: $e');
       setState(() => _isLoading = false);
 
       if (mounted) {
@@ -176,121 +204,61 @@ class _HomeScreenState extends State<HomeScreen> {
                   topRight: Radius.circular(40.0),
                 ),
               ),
-              child: StreamBuilder(
-                stream: _mockTelemetryStream,
-                builder: (context, snapshot) {
-                  if (_isLoading || !snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+              child: _realTimeTelemetryStream == null
+                  ? _buildTelemetryUI(_lastTelemetryData, isConnecting: true)
+                  : StreamBuilder<String>(
+                      stream: _realTimeTelemetryStream,
+                      builder: (context, snapshot) {
+                        // Se abbiamo dati in cache, mostrali mentre attendiamo nuovi dati
+                        if (!snapshot.hasData && _lastTelemetryData != null) {
+                          return _buildTelemetryUI(_lastTelemetryData, isWaiting: true);
+                        }
 
-                  final telemetryData = jsonDecode(snapshot.data as String);
+                        if (_isLoading || !snapshot.hasData) {
+                          return const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(),
+                                SizedBox(height: 16),
+                                Text('In attesa di telemetria...'),
+                              ],
+                            ),
+                          );
+                        }
 
-                  return SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Vehicle Status',
-                            style: TextStyle(
-                              fontSize: 22.0,
-                              fontWeight: FontWeight.bold,
-                              color: lightColorScheme.primary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20.0),
-                        // Battery Energy Card
-                        TelemetryCard(
-                          title: 'Battery Energy',
-                          topRightIcon: Icons.bolt_rounded,
-                          accentColor: Colors.blueAccent,
-                          centerWidget: CircularPercentageWidget(
-                            percentage: telemetryData['battery_level']
-                                .toDouble(),
-                            color: Colors.blueAccent,
-                            lowLevelColor: Colors.redAccent,
-                            lowLevelThreshold: 20,
-                          ),
-                          infoRows: [
-                            InfoRow(
-                              icon: telemetryData['is_charging']
-                                  ? Icons.battery_charging_full
-                                  : Icons.battery_std,
-                              iconColor: telemetryData['is_charging']
-                                  ? Colors.green
-                                  : Colors.orange,
-                              label: '',
-                              value: telemetryData['is_charging']
-                                  ? 'Charging'
-                                  : 'Battery',
-                              valueColor: telemetryData['is_charging']
-                                  ? Colors.green
-                                  : Colors.orange,
-                            ),
-                            InfoRow(
-                              label: 'State',
-                              value: telemetryData['is_charging']
-                                  ? 'Connected'
-                                  : 'Battery',
-                            ),
-                            InfoRow(
-                              label: 'Autonomy',
-                              value:
-                                  '${(telemetryData['battery_level'] * 4).toInt()} km',
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 15.0),
+                        if (snapshot.hasError) {
+                          logger.e('Errore WebSocket: ${snapshot.error}');
+                          // Se c'è un errore ma abbiamo dati in cache, mostrali
+                          if (_lastTelemetryData != null) {
+                            return _buildTelemetryUI(_lastTelemetryData, hasError: true);
+                          }
+                          return Center(
+                            child: Text('Errore: ${snapshot.error}'),
+                          );
+                        }
 
-                        // Velocità
-                        TelemetryCard(
-                          title: 'Speed',
-                          topRightIcon: Icons.speed,
-                          accentColor: Colors.green,
-                          centerWidget: SimpleValueWidget(
-                            value: telemetryData['speed'].toStringAsFixed(1),
-                            unit: 'km/h',
-                            color: Colors.green,
-                          ),
-                          infoRows: [
-                            InfoRow(
-                              label: 'Last Update',
-                              value: _formatTimestamp(
-                                telemetryData['timestamp'],
-                              ),
-                            ),
-                          ],
-                        ),
+                        Map<String, dynamic> telemetryData;
+                        try {
+                          telemetryData = jsonDecode(snapshot.data!);
+                          
+                          // Salva i nuovi dati in cache e aggiorna lo stato
+                          _lastTelemetryData = telemetryData;
+                          _saveTelemetryToCache(telemetryData);
+                        } catch (e) {
+                          logger.e('Errore parsing JSON: $e');
+                          // Se c'è un errore di parsing ma abbiamo dati in cache, mostrali
+                          if (_lastTelemetryData != null) {
+                            return _buildTelemetryUI(_lastTelemetryData, hasError: true);
+                          }
+                          return Center(
+                            child: Text('Errore parsing dati: $e'),
+                          );
+                        }
 
-                        const SizedBox(height: 15.0),
-
-                        TelemetryCard(
-                          title: 'Engine Temperature',
-                          topRightIcon: Icons.thermostat,
-                          accentColor: Colors.orange,
-                          centerWidget: SimpleValueWidget(
-                            value: telemetryData['engine_temp'].toStringAsFixed(0),
-                            unit: '°C',
-                            color: (telemetryData['engine_temp'] as num) > 90
-                                ? Colors.red
-                                : Colors.orange,
-                          ),
-                          infoRows: [
-                            InfoRow(
-                              label: 'Last Update',
-                              value: _formatTimestamp(
-                                telemetryData['timestamp'],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                        return _buildTelemetryUI(telemetryData);
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ),
         ],
@@ -298,11 +266,160 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  String _formatTimestamp(String timestamp) {
+  Widget _buildTelemetryUI(Map<String, dynamic>? telemetryData, {
+    bool isConnecting = false,
+    bool isWaiting = false,
+    bool hasError = false,
+  }) {
+    if (telemetryData == null) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('In attesa di telemetria...'),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Vehicle Status',
+                style: TextStyle(
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.bold,
+                  color: lightColorScheme.primary,
+                ),
+              ),
+              if (isConnecting || isWaiting || hasError)
+                Row(
+                  children: [
+                    if (isConnecting || isWaiting)
+                      const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    if (hasError)
+                      const Icon(Icons.warning_amber, color: Colors.orange, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      isConnecting
+                          ? 'Connessione...'
+                          : isWaiting
+                              ? 'Aggiornamento...'
+                              : 'Dati non aggiornati',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          const SizedBox(height: 20.0),
+          // Battery Energy Card
+          TelemetryCard(
+            title: 'Battery Energy',
+            topRightIcon: Icons.bolt_rounded,
+            accentColor: Colors.blueAccent,
+            centerWidget: CircularPercentageWidget(
+              percentage: (telemetryData['battery_level'] ?? 0).toDouble(),
+              color: Colors.blueAccent,
+              lowLevelColor: Colors.redAccent,
+              lowLevelThreshold: 20,
+            ),
+            infoRows: [
+              InfoRow(
+                icon: (telemetryData['is_charging'] ?? false)
+                    ? Icons.battery_charging_full
+                    : Icons.battery_std,
+                iconColor: (telemetryData['is_charging'] ?? false)
+                    ? Colors.green
+                    : Colors.orange,
+                label: '',
+                value: (telemetryData['is_charging'] ?? false)
+                    ? 'Charging'
+                    : 'Battery',
+                valueColor: (telemetryData['is_charging'] ?? false)
+                    ? Colors.green
+                    : Colors.orange,
+              ),
+              InfoRow(
+                label: 'State',
+                value: (telemetryData['is_charging'] ?? false)
+                    ? 'Connected'
+                    : 'Battery',
+              ),
+              InfoRow(
+                label: 'Autonomy',
+                value: '${((telemetryData['battery_level'] ?? 0) * 4).toInt()} km',
+              ),
+            ],
+          ),
+          const SizedBox(height: 15.0),
+
+          // Velocità
+          TelemetryCard(
+            title: 'Speed',
+            topRightIcon: Icons.speed,
+            accentColor: Colors.green,
+            centerWidget: SimpleValueWidget(
+              value: (telemetryData['speed_kmh'] ?? 0.0).toStringAsFixed(1),
+              unit: 'km/h',
+              color: Colors.green,
+            ),
+            infoRows: [
+              InfoRow(
+                label: 'Last Update',
+                value: _formatTimestamp(telemetryData['timestamp'] ?? ''),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 15.0),
+
+          TelemetryCard(
+            title: 'Engine Temperature',
+            topRightIcon: Icons.thermostat,
+            accentColor: Colors.orange,
+            centerWidget: SimpleValueWidget(
+              value: (telemetryData['engine_temp_c'] ?? 0.0).toStringAsFixed(0),
+              unit: '°C',
+              color: ((telemetryData['engine_temp_c'] ?? 0.0) as num) > 90
+                  ? Colors.red
+                  : Colors.orange,
+            ),
+            infoRows: [
+              InfoRow(
+                label: 'Last Update',
+                value: _formatTimestamp(telemetryData['timestamp'] ?? ''),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatTimestamp(String? timestamp) {
+    if (timestamp == null || timestamp.isEmpty) {
+      return 'N/A';
+    }
     try {
       final dateTime = DateTime.parse(timestamp);
       return '${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
     } catch (e) {
+      logger.e('Errore parsing timestamp: $e');
       return 'N/A';
     }
   }

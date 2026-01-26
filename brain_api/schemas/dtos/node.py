@@ -1,7 +1,3 @@
-"""
-Node DTOs - Pydantic schemas for Node entity.
-"""
-
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -12,7 +8,6 @@ from pydantic import BaseModel, ConfigDict, Field
 class NodeBase(BaseModel):
     """Base schema with common Node fields."""
 
-    name: Optional[str] = Field(None, max_length=100, description="Human-readable name")
     max_power_kw: float = Field(
         22.0, gt=0, le=350, description="Maximum power output in kW"
     )
@@ -35,7 +30,6 @@ class NodeCreate(NodeBase):
 class NodeUpdate(BaseModel):
     """Schema for updating a Node. All fields are optional."""
 
-    name: Optional[str] = Field(None, max_length=100)
     max_power_kw: Optional[float] = Field(None, gt=0, le=350)
     is_maintenance: Optional[bool] = None
 

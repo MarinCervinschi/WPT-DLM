@@ -3,7 +3,7 @@ from typing import Any, Sequence
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
-from ..models import Node
+from ..models import NodeDbo as Node
 from ..schemas import NodeCreate, NodeUpdate
 from .base import BaseRepository
 

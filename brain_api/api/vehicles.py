@@ -42,7 +42,10 @@ def get_vehicle(vehicle_id: str, service: VehicleServiceDep) -> VehicleResponse:
 )
 def create_vehicle(data: VehicleCreate, service: VehicleServiceDep) -> VehicleResponse:
     """Register a new vehicle."""
-    return service.create(data)
+    try:
+        return service.create(data)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.post(

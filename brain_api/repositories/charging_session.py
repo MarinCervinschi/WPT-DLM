@@ -3,7 +3,7 @@ from typing import Sequence
 
 from sqlalchemy import and_, func, select
 
-from ..models import ChargingSession
+from ..models import ChargingSessionDbo as ChargingSession
 from ..schemas import ChargingSessionCreate, ChargingSessionUpdate
 from .base import BaseRepository
 

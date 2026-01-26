@@ -1,11 +1,18 @@
-from ..models import Hub
+from ..models import HubDbo
 from ..repositories import HubRepository
 from ..schemas import HubCreate, HubListResponse, HubResponse, HubUpdate
 from .base import BaseService
 
 
 class HubService(
-    BaseService[Hub, HubRepository, HubCreate, HubUpdate, HubResponse, HubListResponse]
+    BaseService[
+        HubDbo,
+        HubRepository,
+        HubCreate,
+        HubUpdate,
+        HubResponse,
+        HubListResponse,
+    ]
 ):
     """Service layer for Hub operations."""
 

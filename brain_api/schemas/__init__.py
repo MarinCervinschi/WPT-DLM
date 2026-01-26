@@ -1,3 +1,7 @@
+from .dtos.charging_request import (
+    ChargingRequestCreate,
+    ChargingRequestResponse,
+)
 from .dtos.charging_session import (
     ChargingSessionBase,
     ChargingSessionCreate,
@@ -37,6 +41,7 @@ from .dtos.node import (
     NodeResponse,
     NodeUpdate,
 )
+from .dtos.recommendation import RecommendationRequest, RecommendationResponse
 from .dtos.vehicle import (
     VehicleBase,
     VehicleCreate,
@@ -45,32 +50,13 @@ from .dtos.vehicle import (
     VehicleResponse,
     VehicleUpdate,
 )
-from .enums import ChargingState, ConnectionState
 from .responses import ErrorResponse, HealthResponse, MessageResponse
-from .telemetry import (
-    DLMNotification,
-    GeoLocation,
-    HubStatus,
-    NodeStatus,
-    NodeTelemetry,
-    VehicleTelemetry,
-)
 
 __all__ = [
     # Response schemas
     "HealthResponse",
     "ErrorResponse",
     "MessageResponse",
-    # Enums
-    "ConnectionState",
-    "ChargingState",
-    # Telemetry schemas
-    "GeoLocation",
-    "NodeTelemetry",
-    "VehicleTelemetry",
-    "NodeStatus",
-    "HubStatus",
-    "DLMNotification",
     # Hub DTOs
     "HubBase",
     "HubCreate",
@@ -92,6 +78,9 @@ __all__ = [
     "VehicleResponse",
     "VehicleDetailResponse",
     "VehicleListResponse",
+    # ChargingRequest DTOs
+    "ChargingRequestCreate",
+    "ChargingRequestResponse",
     # ChargingSession DTOs
     "ChargingSessionBase",
     "ChargingSessionCreate",
@@ -111,4 +100,7 @@ __all__ = [
     "DLMEventListResponse",
     "DLMEventStats",
     "DLMTriggerReason",
+    # Recommendation DTOs
+    "RecommendationRequest",
+    "RecommendationResponse",
 ]

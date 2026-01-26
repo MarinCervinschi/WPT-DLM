@@ -1,13 +1,13 @@
-from .charging_session import ChargingSession
-from .dlm_event import DLMEvent
-from .hub import Hub
-from .node import Node
-from .vehicle import Vehicle
+from .charging_session_dbo import ChargingSessionDbo
+from .dlm_event_dbo import DLMEventDbo
+from .hub_dbo import HubDbo
+from .node_dbo import NodeDbo
+from .vehicle_dbo import VehicleDbo
 
 __all__ = [
-    "Hub",
-    "Node",
-    "Vehicle",
-    "ChargingSession",
-    "DLMEvent",
+    "HubDbo",
+    "NodeDbo",
+    "VehicleDbo",
+    "ChargingSessionDbo",
+    "DLMEventDbo",
 ]
