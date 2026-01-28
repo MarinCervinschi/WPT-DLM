@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     DESCRIPTION: str = "API for the WPT-DLM Brain Service"
 
     # Environment
-    ENVIRONMENT: str = "development"
+    ENVIRONMENT: str = "production"
 
     # Server
     HOST: str = "0.0.0.0"
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     # Database (PostgreSQL)
-    POSTGRES_HOST: str = "127.0.0.1"
+    POSTGRES_HOST: str = "postgres" if ENVIRONMENT == "production" else "127.0.0.1"
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str = "wptdlm"
     POSTGRES_PASSWORD: str = "wptdlm_secret"
@@ -35,11 +35,17 @@ class Settings(BaseSettings):
     DB_ECHO: bool = False  # SQL query logging
 
     # MQTT Broker
-    MQTT_BROKER_HOST: str = "localhost"
+    MQTT_BROKER_HOST: str = (
+        "wpt-dlm-mqtt" if ENVIRONMENT == "production" else "localhost"
+    )
     MQTT_BROKER_PORT: int = 1883
 
     # InfluxDB
-    INFLUXDB_URL: str = "http://localhost:8086"
+    INFLUXDB_URL: str = (
+        "http://influxdb:8086"
+        if ENVIRONMENT == "production"
+        else "http://localhost:8086"
+    )
     INFLUXDB_TOKEN: str = "change_me_in_production"
     INFLUXDB_ORG: str = "wpt-dlm"
     INFLUXDB_BUCKET: str = "telemetry"
