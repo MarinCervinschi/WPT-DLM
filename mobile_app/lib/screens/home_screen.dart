@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     logger.i('Vehicle ID trovato: $_vehicleId');
     if (_vehicleId != null) {
       _channel = WebSocketChannel.connect(
-        Uri.parse('ws://172.20.10.2:8000/ws/telemetry/$_vehicleId'),
+        Uri.parse('ws://127.0.0.1:8000/ws/telemetry/$_vehicleId'),
       );
       logger.i('Connesso a WebSocket per veicolo $_vehicleId');
 

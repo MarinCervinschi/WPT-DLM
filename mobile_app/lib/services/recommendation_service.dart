@@ -4,7 +4,7 @@ import '../models/recommendation.dart';
 import '../core/logger/app_logger.dart';
 
 class RecommendationService {
-  final String baseUrl = "http://172.20.10.2:8000";
+  final String baseUrl = "http://127.0.0.1:8000";
 
   /// POST /recommendations - Get a charging station recommendation
   /// 
