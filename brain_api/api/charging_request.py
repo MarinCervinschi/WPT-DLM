@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from brain_api.api.dependencies import get_db, get_mqtt_service, get_influx_service
+from brain_api.api.dependencies import get_db, get_influx_service, get_mqtt_service
 from brain_api.schemas import ChargingRequestCreate, ChargingRequestResponse
 from brain_api.services import ChargingRequestService
 

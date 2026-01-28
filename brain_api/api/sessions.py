@@ -92,6 +92,7 @@ def end_session(
     except NotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
+
 @router.delete(
     "/{session_id}",
     status_code=status.HTTP_204_NO_CONTENT,

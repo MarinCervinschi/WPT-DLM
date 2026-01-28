@@ -36,10 +36,9 @@ class DLMNotification(BaseModel):
         if v is None or v < 0:
             return 0.0
         return v
-    
+
     @field_validator("total_grid_load")
     def load_must_be_non_negative(cls, v: float):
         if v is None or v < 0:
             return 0.0
         return v
-    

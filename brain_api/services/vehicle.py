@@ -22,7 +22,9 @@ class VehicleService(
 
     def get_or_create(self, vehicle_id: str, data: VehicleCreate) -> VehicleResponse:
         """Get or create a vehicle (auto-registration)."""
-        vehicle, created = self.repo.get_or_create(vehicle_id, defaults=data.model_dump())
+        vehicle, created = self.repo.get_or_create(
+            vehicle_id, defaults=data.model_dump()
+        )
         if created:
             self.db.commit()
         return VehicleResponse.model_validate(vehicle)

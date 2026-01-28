@@ -65,11 +65,11 @@ class Hub(SmartObject):
         )
 
     def add_node(
-        self, 
-        node_id: str, 
-        max_power_kw: float = 110.0, 
+        self,
+        node_id: str,
+        max_power_kw: float = 110.0,
         simulation: bool = True,
-        serial_port: str = "COM7"
+        serial_port: str = "COM7",
     ) -> Node:
         """
         Add a charging node to this hub.
