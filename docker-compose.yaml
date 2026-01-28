@@ -85,6 +85,23 @@ services:
       - wpt-dlm-network
     restart: always
 
+  brain_api:
+    build:
+      context: .
+      dockerfile: ./brain_api/Dockerfile
+    container_name: wpt-dlm-brain-api
+    ports:
+      - "${BRAIN_API_PORT:-8000}:8000"
+    env_file:
+      - .env
+    depends_on:
+      - mqtt-broker
+      - influxdb
+      - postgres
+    networks:
+      - wpt-dlm-network
+    restart: always
+
 networks:
   wpt-dlm-network:
     driver: bridge
@@ -96,3 +113,4 @@ volumes:
   influxdb_config:
   grafana_data:
   postgres_data:
+  brain_api_data:
