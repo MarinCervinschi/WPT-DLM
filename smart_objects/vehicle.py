@@ -3,7 +3,7 @@ from typing import Optional
 
 from shared.mqtt_dtos import GeoLocation, VehicleRequest
 from shared.services import MQTTService
-from shared.simulation import ChargingRequestEmulator
+from simulation import ChargingRequestEmulator
 from smart_objects.resources import SmartObject, VehicleEngineResource
 
 
